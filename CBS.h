@@ -69,16 +69,8 @@ public:
     float cost;
 
     // tie-breaking rules.
-    int previously_used_by_path = 0;            // 0, this sn has been never used by this vn; 1, this sn has been mapped to this vn in previous paths.
-    int times_used_by_other_paths = 0;          // how many times this node has been used by other vns.
-
-//     no tie-breaking
-//    struct compare_node{
-//        bool operator()(const A_Node * n1, const A_Node * n2 ) const{
-//            return n1->cost >= n2->cost;
-//        }
-//    };
-
+    int previously_used_by_path = 0;            
+    int times_used_by_other_paths = 0;         
 //     tie-breaking:
     struct compare_node{
         bool operator()(const A_Node * n1, const A_Node * n2 ) const{

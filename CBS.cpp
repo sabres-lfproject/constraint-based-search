@@ -80,25 +80,18 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
         }
     }
 
-    // print meta info.
-//    print_meta_edges(metaEdges);
-//    print_meta_nodes(metaNodes,num_vertices);
 
     /**
      * create a list of requirements based on the VNR.
      * Path id is determined by the order of finding solutions for requirements
      *  The path id is: (req_1, req_2, ..., req_n)
-     *
-     *  single node requirement (node_id, -1, -1)
      */
 
     vector<std::tuple<int,int,double>> requirement_list;
 
     // create requirements for all edges
     for(int i =0; i<aRequest.edgeNum; i++){
-//        cout << aRequest.edges[i].from << ", " << aRequest.edges[i].to << ", " << aRequest.edges[i].bw << endl;
 
-        // Warning: the id is the vn node id. Don't confuse it with SN id.
         requirement_list.push_back(make_tuple(aRequest.edges[i].from+num_vertices
                                               ,aRequest.edges[i].to+num_vertices,
                                               aRequest.edges[i].bw));
@@ -130,19 +123,9 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
             req_count++;
         }
     }
-//    cout << "Inital paths: " << endl;
-//    for (Path p: root->paths){
-//        for (auto a: p){
-//            cout << a << ", ";
-//        }
-//        cout << endl;
-//    }
-//    SG.printNodeStatus();
-//    SG.printEdgeStatus();
 
     root->cost = calculate_mapping_cost(root->paths, aRequest, SG_copy,requirement_list);
     root->num_conflict = count_num_conflicts(root,root->paths, aRequest, requirement_list, SG_copy);
-//    cout << "Root cost: "<<root->cost<<endl;
     root->open_handle = OPEN.push(root);
     root->focal_handle = FOCAL.push(root);
     node_track.push_back(root);
@@ -164,23 +147,10 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
                 for (auto node : node_track) {
                     delete node;
                 }
-//    count_num = 0;
                 return vector<Path>();
             }
 
         }
-
-//        cout << count_num <<" , Expanding node: " << curr->id << " cost: " << curr->cost << " num_c: " << curr->num_conflict << " Parent: " << curr->parent_id <<endl;
-//        cout << endl;
-////        cout << "Top paths: " << endl;
-//        for (Path p: curr->paths){
-//            for (auto a: p){
-//                cout << a << ", ";
-//            }
-//            cout << endl;
-////            break;
-//        }
-//        cout << endl;
 
         // check for conflicts
         Conflict conflict = check_conflicts(curr, curr->paths, aRequest, requirement_list, SG_copy);
@@ -200,7 +170,6 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
             for (auto node : node_track) {
                 delete node;
             }
-//            count_num = 0;
 
 
             return solution;
@@ -210,7 +179,7 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
         vector<Constraint> cons_v;
         vector<Constraint> cons_v2;
 
-        if (get<0>(conflict) == 2) {    // VN-SN mapping conflicts.
+        if (get<0>(conflict) == 2) {   
 
 
             cons_v.push_back(make_tuple(get<1>(conflict), get<3>(conflict), get<4>(conflict)));
@@ -234,8 +203,6 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
             }
         }
 
-
-        // not solving a VN-SN mapping conflict.
         if (cons_v2.empty()) {
 
             for (Constraint cons : cons_v) {
@@ -247,10 +214,8 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
                 child->constraint_list = curr->constraint_list;
                 if(find(child->constraint_list[path_to_update].begin(),child->constraint_list[path_to_update].end(),make_pair(get<1>(cons), get<2>(cons))) == child->constraint_list[path_to_update].end()){
                     child->constraint_list[path_to_update].push_back(make_pair(get<1>(cons), get<2>(cons)));
-//                    cout << "add constraint: " << get<1>(cons) << ", " << get<2>(cons) <<endl;
                 }
                 else{
-//                    cout << "constraint already exists. loc 1." << endl;
                     delete child;
                     continue;
                 }
@@ -261,7 +226,6 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
                 if (new_path.size() > 0) {
                     child->paths[path_to_update] = new_path;
 
-//                    print_all_paths(child->paths);
                     child->cost = calculate_mapping_cost(child->paths, aRequest, SG_copy,requirement_list);
                     child->num_conflict = count_num_conflicts(child, child->paths, aRequest, requirement_list, SG_copy);
 
@@ -279,8 +243,8 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
                 }
             }
         }
-        else { // solving a VN-SN mapping problem
-            // making a node for stopping many paths using their choice.
+        else { 
+        
             CBS_Node* child = new CBS_Node();
             child->id = curr->id + 1;
             child->paths = curr->paths;
@@ -291,11 +255,9 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
                 int path_to_update = get<0>(cons);
                 if(find(child->constraint_list[path_to_update].begin(),child->constraint_list[path_to_update].end(),make_pair(get<1>(cons), get<2>(cons))) == child->constraint_list[path_to_update].end()){
                     child->constraint_list[path_to_update].push_back(make_pair(get<1>(cons), get<2>(cons)));
-//                    cout << "add constraint: " << get<1>(cons) << ", " << get<2>(cons) <<endl;
                     generate_child_node = true;
                 }
                 else{
-//                    cout << "constraint already exists. loc 2." << endl;
                     continue;
                 }
 
@@ -335,14 +297,11 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
                 child->parent_id = curr->id;
                 if(find(child->constraint_list[path_to_update].begin(),child->constraint_list[path_to_update].end(),make_pair(get<1>(cons), get<2>(cons))) == child->constraint_list[path_to_update].end()){
                     child->constraint_list[path_to_update].push_back(make_pair(get<1>(cons), get<2>(cons)));
-//                    cout << "add constraint: " << get<1>(cons) << ", " << get<2>(cons) <<endl;
                 }
                 else{
-//                    cout << "constraint already exists. loc 3." << endl;
 
                     continue;
                 }
-//                cout << "child node ----------- " << child->id << " ------------------" << endl;
                 Path new_path = find_requirement_path(requirement_list[path_to_update],
                                                       SG_copy,metaNodes, metaEdges,
                                                       child->constraint_list[path_to_update],child->paths, path_to_update,false, aRequest);
@@ -350,7 +309,6 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
                 if (new_path.size() > 0) {
                     child->paths[path_to_update] = new_path;
 
-//                    print_all_paths(child->paths);
                     child->cost = calculate_mapping_cost(child->paths, aRequest, SG_copy,requirement_list);
                     child->num_conflict = count_num_conflicts(child, child->paths, aRequest, requirement_list, SG_copy);
 
@@ -382,7 +340,6 @@ vector<Path> CBS_Solver::find_solution(SubstrateGraph & SG, VNRequest & aRequest
 
     cout << "No solution CBS." << endl;
 
-//    count_num = 0;
     return vector<Path>();
 
 }
@@ -418,14 +375,12 @@ Path CBS_Solver::find_requirement_path(std::tuple<int,int,double> & requirement,
 
     int start_vn = get<0>(requirement);
     int goal_vn = get<1>(requirement);
-//    cout << "Finding path from " << start_vn << "to " << goal_vn << endl;
 
     root->sn_id = start_vn;
     root->cost = 0;
 
     OPEN.push(root);
 
-    //Init data for CAT.
 
     // record how many times sub nodes have  been used by other vn nodes. The vn in this pathfinding is not counted.
     map<int, int> sn_usage_counter_start = get_used_sn(paths, start_vn, paths.size());
@@ -446,14 +401,8 @@ Path CBS_Solver::find_requirement_path(std::tuple<int,int,double> & requirement,
             }
             else{
                 make_path(top, path);
-//                cout << endl;
-//                cout << "Path found is : " << endl;
+
                 reverse(path.begin(), path.end());
-//
-//                for (auto a: path){
-//                    cout << a << ", ";
-//                }
-//                cout << endl;
 
                 for (auto node : node_track) {
                     delete node;
@@ -467,10 +416,6 @@ Path CBS_Solver::find_requirement_path(std::tuple<int,int,double> & requirement,
 
         // get neighbors
         vector<int> neighbors = getNeighbors(top->sn_id, metaNodes,metaEdges,SN);
-//        cout << "Neighbors: " << endl;
-//        for(auto n:neighbors){cout << n << ", ";}
-//        cout << endl;
-
 
         for(int n: neighbors){
 
@@ -506,7 +451,6 @@ Path CBS_Solver::find_requirement_path(std::tuple<int,int,double> & requirement,
 
 
                     child->cost = top->cost + 1;
-//                    cout << child->sn_id << "," << vnr.nodes[start_vn-SN.nodeNum].cpu << endl;
 
                 }else{  // cost for sn-sn and sn-vn mapping.
 
@@ -529,17 +473,9 @@ Path CBS_Solver::find_requirement_path(std::tuple<int,int,double> & requirement,
             }
         }
 
-//        cout << "OPEN list is \n";
-//        for(auto itopen = OPEN.ordered_begin(); itopen!=OPEN.ordered_end(); itopen++){
-//            cout << itopen.get_node()->value->sn_id << ": " << itopen.get_node()->value->cost
-//            << ", " << itopen.get_node()->value->previously_used_by_path << ", " <<
-//            itopen.get_node()->value->times_used_by_other_paths<< "; ";
-//        }
-//        cout << endl;
 
         CLOSED.push_back(top->sn_id);
     }
-//    cout << "failed to find for path " << this_path_id << ":" << start_vn << ", " << goal_vn << endl;
     return path;
 }
 
@@ -591,23 +527,14 @@ Conflict CBS_Solver::check_conflicts(CBS_Node * n, vector<Path> & paths, VNReque
     int num_SN_nodes = SN.nodeNum;
 
     map<int, double> used_CPU_list;
-    // record which paths used this node. return this list, if a node conflict is found.
     map<int, vector<int>> paths_used_node;
-    map<int, int> VN_SN_one_to_one; // enforce the one-to-one mapping of vN and SN. [vn] -> sn.
-    map<int, int> SN_VN_one_to_one; // a reverse lookup for SN-VN.
+    map<int, int> VN_SN_one_to_one;
+    map<int, int> SN_VN_one_to_one;
     map<pair<int,int>,double> used_BD_list;
     map < pair<int, int>, vector<int>> paths_used_edge;
 
     for (Path p: paths){
 
-//        for (auto temp: paths_used_node){
-//            cout << temp.first << endl;
-//            for (auto temp2: temp.second){
-//                cout << temp2;
-//            }
-//            cout <<endl;
-//        }
-//        cout <<endl;
 
         auto it = VN_SN_one_to_one.find(p[0]);
         if (it == VN_SN_one_to_one.end()) { // this vn hasn't been mapped yet.
@@ -615,7 +542,6 @@ Conflict CBS_Solver::check_conflicts(CBS_Node * n, vector<Path> & paths, VNReque
             // check if other vns already took this sn.
             auto it_sn_vn = SN_VN_one_to_one.find(p[1]);
             if(it_sn_vn!=SN_VN_one_to_one.end()){ // another vn is using this sn.
-                // create a conflict and stop using it.
 
                 Conflict c = make_tuple(2, path_id, paths_used_node[p[1]], p[0], p[1], SN_VN_one_to_one[p[1]],p[1]);
                 return c;
@@ -625,46 +551,39 @@ Conflict CBS_Solver::check_conflicts(CBS_Node * n, vector<Path> & paths, VNReque
                 SN_VN_one_to_one[p[1]] = p[0];
                 used_CPU_list[p[1]] += aRequest.nodes[p[0]-num_SN_nodes].cpu;
                 paths_used_node[p[1]].push_back(path_id);
-//                cout << "paths used_node size: " << paths_used_node.size() << endl;
             }
         }
         else { // this vn has been mapped.
-//            cout << "p[0]: " << p[0] << " recorded: " << VN_SN_one_to_one[p[0]] << " p[1]: " << p[1] << endl;
             if (p[1] != VN_SN_one_to_one[p[0]]) {
                 Conflict c = make_tuple(2, path_id, paths_used_node[VN_SN_one_to_one[p[0]]], p[0], p[1], p[0],VN_SN_one_to_one[p[0]]);
                 return c;
             }
-            else{ // p[1] is the same as the record. don't add CPU usage, don't add to 1 to 1 mapping, but add this path_id to the path used sn.
+            else{ 
                 paths_used_node[p[1]].push_back(path_id);
             }
         }
 
 
-        // type 0 conflict
         if (used_CPU_list[p[1]] > SN.nodes[p[1]].rest_cpu) {
-//            cout << "CPU resource overflow: " << p[1] << "used: " <<  used_CPU_list[p[1]] << "Available: " << SN.nodes[p[1]].rest_cpu << endl;
             paths_used_node[p[1]].push_back(path_id);
             Conflict c = make_tuple(0, -1, paths_used_node[p[1]], p[0], p[1], -1,-1);
             return c;
         }
 
-        // stop here, if the length of the path is 2. VN,SN.
         if (p.size() == 2) {
             path_id++;
             continue;
         }
 
-        // p -2 -> -1
         int end_idx = p.size() - 1;
         int last_sn_idx = end_idx - 1;
 
 
-        // type 2 conflict
         auto it2 = VN_SN_one_to_one.find(p[end_idx]);
         if (it2 == VN_SN_one_to_one.end()) {
 
             auto it_sn_vn2 = SN_VN_one_to_one.find(p[last_sn_idx]);
-            if(it_sn_vn2!=SN_VN_one_to_one.end()){ // another vn is using this sn.
+            if(it_sn_vn2!=SN_VN_one_to_one.end()){
 
                 Conflict c = make_tuple(2, path_id, paths_used_node[p[last_sn_idx]], p[end_idx], p[last_sn_idx], SN_VN_one_to_one[p[last_sn_idx]],p[last_sn_idx]);
                 return c;
@@ -694,7 +613,6 @@ Conflict CBS_Solver::check_conflicts(CBS_Node * n, vector<Path> & paths, VNReque
             return c;
         }
 
-        // check in-between path, p 1->-2
         for (int p_i = 1; p_i < p.size() - 2; p_i++) {
 
             used_BD_list[make_pair(p[p_i], p[p_i + 1])] += get<2>(requirement_list[path_id]);
@@ -703,7 +621,7 @@ Conflict CBS_Solver::check_conflicts(CBS_Node * n, vector<Path> & paths, VNReque
             paths_used_edge[make_pair(p[p_i], p[p_i + 1])].push_back(path_id);
             paths_used_edge[make_pair(p[p_i + 1], p[p_i])].push_back(path_id);
             if (used_BD_list[make_pair(p[p_i], p[p_i + 1])] > SN.edges[SN.edgeMap[make_pair(p[p_i],p[p_i + 1])]].rest_bw) {
-//                cout << "Bandwidth overflow: " << p[p_i] << " to " << p[p_i + 1] << " used: " << used_BD_list[make_pair(p[p_i], p[p_i + 1])] << " Available: " << SN.edges[SN.edgeMap[make_pair(p[p_i],p[p_i + 1])]].rest_bw << endl;
+
                 Conflict c = make_tuple(1, -1, paths_used_edge[make_pair(p[p_i], p[p_i + 1])], p[p_i], p[p_i + 1], -1,-1);
                 return c;
             }
@@ -729,8 +647,6 @@ int CBS_Solver::count_num_conflicts(CBS_Node* n, vector<Path>& paths, VNRequest 
 
     for (Path p: paths){
 
-        // init used_SN_counting
-        // p 0->1
         auto it = VN_SN_one_to_one.find(p[0]);
         if (it == VN_SN_one_to_one.end()) { // this vn hasn't been mapped yet.
 
@@ -744,20 +660,19 @@ int CBS_Solver::count_num_conflicts(CBS_Node* n, vector<Path>& paths, VNRequest 
                 SN_VN_one_to_one[p[1]] = p[0];
                 used_CPU_list[p[1]] += aRequest.nodes[p[0]-num_SN_nodes].cpu;
                 paths_used_node[p[1]].push_back(path_id);
-//                cout << "paths used_node size: " << paths_used_node.size() << endl;
             }
         }
         else {
             if (p[1] != VN_SN_one_to_one[p[0]]) {
                 num_conflicts++;
             }
-            else{ // p[1] is the same as the record. don't add CPU usage, don't add to 1 to 1 mapping, but add this path_id to the path used sn.
+            else{ 
                 paths_used_node[p[1]].push_back(path_id);
             }
         }
 
         if (used_CPU_list[p[1]] > SN.nodes[p[1]].rest_cpu) {
-//            cout << "CPU resource overflow: " << p[1] << "used: " <<  used_CPU_list[p[1]] << "Available: " << SN.nodes[p[1]].rest_cpu << endl;
+
             num_conflicts++;
         }
 
@@ -766,7 +681,6 @@ int CBS_Solver::count_num_conflicts(CBS_Node* n, vector<Path>& paths, VNRequest 
             continue;
         }
 
-        // p -2 -> -1
         int end_idx = p.size() - 1;
         int last_sn_idx = end_idx - 1;
 
@@ -797,8 +711,6 @@ int CBS_Solver::count_num_conflicts(CBS_Node* n, vector<Path>& paths, VNRequest 
             num_conflicts++;
         }
 
-        // p 1->-2
-
         for (int p_i = 1; p_i < p.size() - 2; p_i++) {
             used_BD_list[make_pair(p[p_i], p[p_i + 1])] += get<2>(requirement_list[path_id]);
             used_BD_list[make_pair(p[p_i + 1], p[p_i])] += get<2>(requirement_list[path_id]);
@@ -822,15 +734,12 @@ double CBS_Solver::calculate_mapping_cost(vector<Path> paths, VNRequest & vnr,Su
     map<int,int> VN_SN;
 
     for(Path p: paths){
-        // cost of p0 -> p1.
         auto it = VN_SN.find(p[0]);
         if (it == VN_SN.end()){
             cost_sum += vnr.nodes[p[0]-num_SN_nodes].cpu;
             VN_SN[p[0]] = p[1];
         }
 
-
-        // cost of p-1 -> p-2
         int end_idx = p.size() - 1;
         int last_sn_idx = end_idx - 1;
         auto it2 = VN_SN.find(p[end_idx]);
@@ -839,7 +748,6 @@ double CBS_Solver::calculate_mapping_cost(vector<Path> paths, VNRequest & vnr,Su
             VN_SN[p[end_idx]] = p[last_sn_idx];
         }
 
-        // cost of edges
         for (int p_i = 1; p_i<p.size()-2; p_i++){
             cost_sum += get<2>(requirement_list[path_id]);
         }
@@ -888,7 +796,6 @@ map<int,int> CBS_Solver::get_used_sn(vector<Path> & paths, int skip_vn_id, int u
     int path_counter = 0;
     for(Path p: paths){
         if(path_counter>=upto_path_id){
-//            cout << "early break; \n";
             return used_sn;
         }
         if(p[0] != skip_vn_id){
