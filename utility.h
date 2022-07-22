@@ -92,14 +92,14 @@ public:
 
 class SubstrateNode: public Node {
 public:
-  int count;  // this is id?
-  double rest_cpu;  // rest of resources
-  bool touched;   // what is this?
+  int count;  
+  double rest_cpu;  
+  bool touched;   
 
-  vector<int> edgeIDs;    // which edges are related to this node?
+  vector<int> edgeIDs;    
 
-  vector<int> req_ids;    // which reqs are using this node?
-  vector<int> node_ids;    // what's this?
+  vector<int> req_ids;   
+  vector<int> node_ids;   
   vector<double> used_cpu;
 
   SubstrateNode(int _x, int _y, double _cpu);
@@ -135,14 +135,13 @@ public:
 class SubstrateGraph {
 public:
   string fileName;
-  int nodeNum, edgeNum, substrateID; // what ID?
+  int nodeNum, edgeNum, substrateID;
 
   vector<SubstrateNode> nodes;
   vector<SubstrateEdge> edges;
 
-  map< pair<int, int>, int > edgeMap;  // ?
+  map< pair<int, int>, int > edgeMap; 
   map<int, vector<int>> neighbor;
-  // add reqs and remove reqs (meta nodes/edges)?
   void addVNMapping(VNRequest &aRequest);
   void removeVNMapping(const VNRequest &aRequest);
 
@@ -156,7 +155,6 @@ public:
 
   int initGraph();
 
-  // Mapping VN to SN nodes?
   int findNodesWithinConstraints(Node &aNode, int reqID, int maxD,
       vector<int> &validNodeIDs);
 
@@ -171,7 +169,6 @@ public:
       edgeNum = graph.edgeNum;
       substrateID = graph.substrateID;
 
-      // I hope these are deep copy
       nodes = graph.nodes;
       edges = graph.edges;
       neighbor = graph.neighbor;
