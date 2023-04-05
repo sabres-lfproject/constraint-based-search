@@ -1,3 +1,6 @@
+# https://github.com/docker-library/gcc/issues/57
+# use debian images here
+
 stages:
   - build
   - test
@@ -19,7 +22,7 @@ build-code:
     paths:
       - ./build/
   tags:
-    - cpp
+    - bullseye
 
 test-code:
   stage: test
@@ -29,7 +32,7 @@ test-code:
   script:
     - echo ""
   tags:
-    - cpp
+    - bullseye
 
 build-container:
   stage: container
