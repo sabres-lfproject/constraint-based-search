@@ -1,0 +1,41 @@
+stages:
+  - build
+  - test
+  - container
+
+build-code:
+  stage: build
+  before_script:
+    - apt update
+    - apt install -y cmake make libboost-all-dev
+  script:
+    - mkdir build
+    - pushd build
+    - VERBOSE=1 cmake ..
+    - make
+    - popd
+  artifacts:
+    when: always
+    paths:
+      - ./build/
+  tags:
+    - cpp
+
+test-code:
+  stage: test
+  before_script:
+    - apt update
+    - apt-get update
+  script:
+    - echo ""
+  tags:
+    - cpp
+
+build-container:
+  stage: container
+  before_script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASS} docker.io
+  script:
+    - cd ./docker && ./build-and-push.sh && cd ..
+  tags:
+    - shell

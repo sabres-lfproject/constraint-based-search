@@ -59,8 +59,6 @@
 
 #define MAX_PATHS_TO_CONSIDER 1
 
-#define LEN_FILENAME 128
-
 #define MAX_CPU 100
 #define MAX_BW  100
 

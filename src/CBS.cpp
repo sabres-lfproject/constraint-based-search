@@ -14,7 +14,7 @@ void print_meta_nodes(const map<int, vector<int>>& meta_nodes, int numSNNodes){
 
     for(auto it = meta_nodes.begin(); it!= meta_nodes.end(); it++){
         cout << it->first << ": ";
-        for (int i =0; i<it->second.size(); i++){
+        for (unsigned long i =0; i<it->second.size(); i++){
             cout << it->second[i] << " ";
         }
         cout << endl;
@@ -25,7 +25,7 @@ void print_meta_nodes(const map<int, vector<int>>& meta_nodes, int numSNNodes){
 void print_meta_edges(const map<int,vector<int>> & meta_edges){
     for(auto it = meta_edges.begin(); it!= meta_edges.end(); it++){
         cout << it->first << ": ";
-        for (int i =0; i<it->second.size(); i++){
+        for (unsigned long i =0; i<it->second.size(); i++){
             cout << it->second[i] << " ";
         }
         cout << endl;
@@ -457,7 +457,7 @@ Path CBS_Solver::find_requirement_path(std::tuple<int,int,double> & requirement,
 //                    float h = 0;
                     vector<int> n_neighbors = getNeighbors(n, metaNodes,metaEdges,SN);
                     bool connected_to_goal = (find(n_neighbors.begin(),n_neighbors.end(), goal_vn) != n_neighbors.end());
-                    if(connected_to_goal && n==sn_mapped_to_goal_before & (!init_path)){
+                    if(connected_to_goal && (n==sn_mapped_to_goal_before) & (!init_path)){
                         child->previously_used_by_path = 1;
                         child->times_used_by_other_paths = sn_usage_counter_goal[n];
                     }
@@ -613,7 +613,7 @@ Conflict CBS_Solver::check_conflicts(CBS_Node * n, vector<Path> & paths, VNReque
             return c;
         }
 
-        for (int p_i = 1; p_i < p.size() - 2; p_i++) {
+        for (unsigned long p_i = 1; p_i < p.size() - 2; p_i++) {
 
             used_BD_list[make_pair(p[p_i], p[p_i + 1])] += get<2>(requirement_list[path_id]);
             used_BD_list[make_pair(p[p_i + 1], p[p_i])] += get<2>(requirement_list[path_id]);
@@ -711,7 +711,7 @@ int CBS_Solver::count_num_conflicts(CBS_Node* n, vector<Path>& paths, VNRequest 
             num_conflicts++;
         }
 
-        for (int p_i = 1; p_i < p.size() - 2; p_i++) {
+        for (unsigned long p_i = 1; p_i < p.size() - 2; p_i++) {
             used_BD_list[make_pair(p[p_i], p[p_i + 1])] += get<2>(requirement_list[path_id]);
             used_BD_list[make_pair(p[p_i + 1], p[p_i])] += get<2>(requirement_list[path_id]);
 
@@ -748,7 +748,7 @@ double CBS_Solver::calculate_mapping_cost(vector<Path> paths, VNRequest & vnr,Su
             VN_SN[p[end_idx]] = p[last_sn_idx];
         }
 
-        for (int p_i = 1; p_i<p.size()-2; p_i++){
+        for (unsigned long p_i = 1; p_i<p.size()-2; p_i++){
             cost_sum += get<2>(requirement_list[path_id]);
         }
         path_id++;
@@ -772,7 +772,7 @@ void CBS_Solver::update_VNR_info(vector<Path> paths, VNRequest & vnr,SubstrateGr
         vnr.edges[vnr_edge_id].substrateID = SG.substrateID;
 
         if(p.size()>3){
-            for(int j =1; j<p.size()-2;j++){
+            for(unsigned long j =1; j<p.size()-2;j++){
                 int from = p[j];
                 int to = p[j+1];
 

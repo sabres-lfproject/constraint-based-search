@@ -16,19 +16,14 @@ using namespace std;
 
 
 int main(int argc, char *argv[]) {
-  int firstReq, lastReq, reqCount;
-  char reqFolderName[LEN_FILENAME];
-
-  char outputFileName[LEN_FILENAME];
+  int reqCount;
 
   int i;
-  char reqFileName[LEN_FILENAME];
   bool aOne = false, bOne = false;
   double mNS, aNS, mLS, aLS, sdNS, sdLS;
   double __MULT = 1.0;
   double sub_w = 1.0;
-  bool fullOrPartialSplit;
-  int nodeMapMethod, edgeMapMethod;
+  int nodeMapMethod;
   double nodeRev, edgeRev, totRev, nodeCost, edgeCost, totCost;
   string sn_graph_path;
   if (argc != 7) {
@@ -48,15 +43,14 @@ int main(int argc, char *argv[]) {
   }
 
   reqCount = atoi(argv[1]); // total number of requests
-  strcpy(reqFolderName, argv[2]); // folder containing the requests
   sn_graph_path=argv[3];
-  strcpy(outputFileName, argv[4]);  // where to save output
+
+  std::string reqFolderName = argv[2];
+  std::string outputFileName = argv[4];
 
   string mapping_save_to = argv[5];
 
   nodeMapMethod = 7;  // 1: GREEDY. 5: D-ViNE 6: R-ViNE 7:VNE-CBS
-  edgeMapMethod = 5;  // 1: GREEDY. 5: MCF
-  fullOrPartialSplit = 1; // true: ignore VNR's choice
   aOne = bOne = 0;  // true: try to load balance
   __MULT = 1.0; // cpu vs bw weighting value
   sub_w = atof(argv[6]); // suboptimal bound for cbs.
@@ -73,7 +67,7 @@ int main(int argc, char *argv[]) {
   CBS_Solver cbs;
 
   // output file opening.
-  FILE *outputFP = fopen(outputFileName, "w");
+  FILE *outputFP = fopen(outputFileName.c_str(), "w");
   if (outputFP == NULL) {
     cout << "failed to open file: " << outputFileName << endl;
     return COULD_NOT_OPEN_FILE;
@@ -86,7 +80,7 @@ int main(int argc, char *argv[]) {
 
   // VNR vector
   vector<VNRequest>::iterator VNRIter;
-  int curVNR, mappingResult;
+  int curVNR;
   bool requestAccepted = false;
 
   int nodeMapFailCount = 0, edgeMapFailCount = 0, totalMapFailCount = 0;
@@ -95,10 +89,11 @@ int main(int argc, char *argv[]) {
 
   // read all the requests, one by one.
   for (i = 0; i < reqCount; i++) {
-    sprintf(reqFileName, "%s/req%d.txt", reqFolderName, i);
+    std::string reqFileName = reqFolderName + "/req" + std::to_string(i);
+    //sprintf(reqFileName, "%s/req%d.txt", reqFolderName, i);
 
     // save the request in the list.
-    VNR.push_back(VNRequest(reqFileName, i));
+    VNR.push_back(VNRequest(reqFileName.c_str(), i));
 
     // create the arrival event and add to event queue.
     mySim.PQ.push(Event(EVENT_ARRIVE, VNR[i].time, i));

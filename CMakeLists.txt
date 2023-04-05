@@ -1,17 +1,25 @@
-project(VNE_CBS_Sim)
+project(cbs)
+
+
 
 cmake_minimum_required (VERSION 2.6)
-#set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -Wall -std=c++0x -pthread -m64")
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -Wall -Wpedantic -Werror -std=c++20")
 
-#set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -Wall --std=c++0x ")
+include_directories(
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src
+)
 
-include_directories("../")
-file(GLOB SOURCES "../*.cpp" "*.cpp")
+file(GLOB SOURCES
+    "${PROJECT_SOURCE_DIR}/include/*.h"
+    "${PROJECT_SOURCE_DIR}/include/*.hpp"
+    "${PROJECT_SOURCE_DIR}/src/*.cpp"
+    "${PROJECT_SOURCE_DIR}/src/*.c"
+)
 
 # Find Boost
 find_package(Boost)
 include_directories( ${Boost_INCLUDE_DIRS} )
 
-add_executable(VNE_CBS_Sim ${SOURCES})
-
+add_executable(cbs ${SOURCES})
