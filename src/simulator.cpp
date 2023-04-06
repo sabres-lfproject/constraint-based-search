@@ -5,7 +5,7 @@
  *      Author: nmmkchow
  */
 
-#include "simulator.h"
+#include "simulator.hpp"
 
 Simulator::Simulator() {}
 

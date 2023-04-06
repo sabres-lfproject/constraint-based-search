@@ -1,4 +1,4 @@
-#include "CBS.h"
+#include "cbs.hpp"
 
 // helper functions
 void print_all_paths(const vector<Path>& paths) {

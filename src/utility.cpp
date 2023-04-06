@@ -5,9 +5,9 @@
  *      Author: nmmkchow
  */
 
-#include "utility.h"
+#include "utility.hpp"
 
-#include "def.h"
+#include "def.hpp"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Miscellaneous Functions                                                   //

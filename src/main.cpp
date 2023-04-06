@@ -5,9 +5,9 @@
 // Virtual network embedding with coordinated node and link mapping. In IEEE INFOCOM 2009 (pp. 783-791). IEEE.
 //
 
-#include "CBS.h"
-#include "def.h"
-#include "simulator.h"
+#include "cbs.hpp"
+#include "def.hpp"
+#include "simulator.hpp"
 
 using namespace std;
 

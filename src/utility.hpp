@@ -5,24 +5,22 @@
  *      Author: nmmkchow
  */
 
-#ifndef UTILITY_H_
-#define UTILITY_H_
+#ifndef UTILITY_HPP_
+#define UTILITY_HPP_
 
-#include <cstdio>
-#include <cstring>
-#include <cstdlib>
-#include <cctype>
 #include <cassert>
+#include <cctype>
 #include <cmath>
-
-#include <iostream>
-#include <fstream>
-
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <deque>
-#include <vector>
+#include <fstream>
+#include <iostream>
 #include <map>
+#include <vector>
 
-#include "def.h"
+#include "def.hpp"
 
 using namespace std;
 
@@ -50,20 +48,24 @@ class VNRequest;
 
 // function declarations
 void printMapping(VNRequest &VNR, SubstrateGraph &SG);
-void saveMapping(VNRequest &VNR, SubstrateGraph &SG, string save_file_path,int VNR_id);
+void saveMapping(VNRequest &VNR, SubstrateGraph &SG, string save_file_path, int VNR_id);
 void randomPermutation(vector<int> &series);
 
-void getDifferentStress(SubstrateGraph &SG, double &mNS, double &aNS,
-    double &mLS, double &aLS, double &sdNS, double &sdLS);
+void getDifferentStress(SubstrateGraph &SG,
+                        double &mNS,
+                        double &aNS,
+                        double &mLS,
+                        double &aLS,
+                        double &sdNS,
+                        double &sdLS);
 
-double getRevenue(VNRequest &aRequest, double __MULT,
-    double &nodeRev, double &edgeRev);
+double getRevenue(VNRequest &aRequest, double __MULT, double &nodeRev, double &edgeRev);
 
-double getCost(VNRequest &VNR, SubstrateGraph &SG, double __MULT,
-    double &nodeCost, double &edgeCost, bool aOne, bool bOne);
+double
+getCost(VNRequest &VNR, SubstrateGraph &SG, double __MULT, double &nodeCost, double &edgeCost, bool aOne, bool bOne);
 
 class Node {
-public:
+ public:
   int x, y;
   double cpu;
 
@@ -72,12 +74,12 @@ public:
 #ifdef MYCPP
   Node(const Node &o);
   virtual ~Node();
-  const Node& operator=(const Node &o);
+  const Node &operator=(const Node &o);
 #endif
 };
 
 class Edge {
-public:
+ public:
   int from, to;
   double bw, dlay;
 
@@ -86,20 +88,20 @@ public:
 #ifdef MYCPP
   Edge(const Edge &o);
   virtual ~Edge();
-  const Edge& operator=(const Edge &o);
+  const Edge &operator=(const Edge &o);
 #endif
 };
 
-class SubstrateNode: public Node {
-public:
-  int count;  
-  double rest_cpu;  
-  bool touched;   
+class SubstrateNode : public Node {
+ public:
+  int count;
+  double rest_cpu;
+  bool touched;
 
-  vector<int> edgeIDs;    
+  vector<int> edgeIDs;
 
-  vector<int> req_ids;   
-  vector<int> node_ids;   
+  vector<int> req_ids;
+  vector<int> node_ids;
   vector<double> used_cpu;
 
   SubstrateNode(int _x, int _y, double _cpu);
@@ -107,15 +109,15 @@ public:
 #ifdef MYCPP
   SubstrateNode(const SubstrateNode &o);
   virtual ~SubstrateNode();
-  const SubstrateNode& operator=(const SubstrateNode &o);
+  const SubstrateNode &operator=(const SubstrateNode &o);
 #endif
 
   double distanceFrom(Node &aNode);
   double distanceFrom(SubstrateNode &aNode);
 };
 
-class SubstrateEdge: public Edge {
-public:
+class SubstrateEdge : public Edge {
+ public:
   int count;
   double rest_bw;
 
@@ -128,19 +130,19 @@ public:
 #ifdef MYCPP
   SubstrateEdge(const SubstrateEdge &o);
   virtual ~SubstrateEdge();
-  const SubstrateEdge& operator=(const SubstrateEdge &o);
+  const SubstrateEdge &operator=(const SubstrateEdge &o);
 #endif
 };
 
 class SubstrateGraph {
-public:
+ public:
   string fileName;
   int nodeNum, edgeNum, substrateID;
 
   vector<SubstrateNode> nodes;
   vector<SubstrateEdge> edges;
 
-  map< pair<int, int>, int > edgeMap; 
+  map<pair<int, int>, int> edgeMap;
   map<int, vector<int>> neighbor;
   void addVNMapping(VNRequest &aRequest);
   void removeVNMapping(const VNRequest &aRequest);
@@ -150,34 +152,33 @@ public:
 #ifdef MYCPP
   SubstrateGraph(const SubstrateGraph &o);
   virtual ~SubstrateGraph();
-  const SubstrateGraph& operator=(const SubstrateGraph &o);
+  const SubstrateGraph &operator=(const SubstrateGraph &o);
 #endif
 
   int initGraph();
 
-  int findNodesWithinConstraints(Node &aNode, int reqID, int maxD,
-      vector<int> &validNodeIDs);
+  int findNodesWithinConstraints(Node &aNode, int reqID, int maxD, vector<int> &validNodeIDs);
 
   double getNodePotential(int nodeID);
 
   void printNodeStatus();
   void printEdgeStatus();
 
-  SubstrateGraph(SubstrateGraph & graph){
-      fileName = graph.fileName;
-      nodeNum = graph.nodeNum;
-      edgeNum = graph.edgeNum;
-      substrateID = graph.substrateID;
+  SubstrateGraph(SubstrateGraph &graph) {
+    fileName = graph.fileName;
+    nodeNum = graph.nodeNum;
+    edgeNum = graph.edgeNum;
+    substrateID = graph.substrateID;
 
-      nodes = graph.nodes;
-      edges = graph.edges;
-      neighbor = graph.neighbor;
-      edgeMap = graph.edgeMap;
+    nodes = graph.nodes;
+    edges = graph.edges;
+    neighbor = graph.neighbor;
+    edgeMap = graph.edgeMap;
   }
 };
 
-class VNNode: public Node {
-public:
+class VNNode : public Node {
+ public:
   int substrateID;
   int subNodeID;
 
@@ -188,29 +189,29 @@ public:
 #ifdef MYCPP
   VNNode(const VNNode &o);
   virtual ~VNNode();
-  const VNNode& operator=(const VNNode &o);
+  const VNNode &operator=(const VNNode &o);
 #endif
 };
 
-class VNEdge: public Edge {
-public:
+class VNEdge : public Edge {
+ public:
   int substrateID;
   int pathLen;
   double pathDelay;
-  vector < int> subPath;
-  vector <double> subBW;
+  vector<int> subPath;
+  vector<double> subBW;
 
   VNEdge(int _from, int _to, double _bw, double _dlay);
 
 #ifdef MYCPP
   VNEdge(const VNEdge &o);
   virtual ~VNEdge();
-  const VNEdge& operator=(const VNEdge &o);
+  const VNEdge &operator=(const VNEdge &o);
 #endif
 };
 
 class VNRequest {
-public:
+ public:
   string fileName;
   int split, time, duration, topology, maxD;
   double revenue;
@@ -224,7 +225,7 @@ public:
 #ifdef MYCPP
   VNRequest(const VNRequest &o);
   virtual ~VNRequest();
-  const VNRequest& operator=(const VNRequest &o);
+  const VNRequest &operator=(const VNRequest &o);
 #endif
 
   int initGraph();
@@ -237,17 +238,13 @@ public:
 };
 
 class VNEdgeComparerASC {
-public:
-  bool operator()(const VNEdge& n1, const VNEdge& n2) const {
-    return (n1.bw < n2.bw);
-  }
+ public:
+  bool operator()(const VNEdge &n1, const VNEdge &n2) const { return (n1.bw < n2.bw); }
 };
 
 class VNEdgeComparerDESC {
-public:
-  bool operator()(const VNEdge& n1, const VNEdge& n2) const {
-    return (n1.bw > n2.bw);
-  }
+ public:
+  bool operator()(const VNEdge &n1, const VNEdge &n2) const { return (n1.bw > n2.bw); }
 };
 
-#endif /* UTILITY_H_ */
+#endif /* UTILITY_HPP_ */
