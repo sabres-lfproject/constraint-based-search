@@ -31,10 +31,6 @@ linter:
     - apt install -y clang-format
   script:
     - clang-format -style=file --dry-run --Werror src/*.hpp src/*.cpp
-  artifacts:
-    when: always
-    paths:
-      - ./build/
   tags:
     - bullseye
 
