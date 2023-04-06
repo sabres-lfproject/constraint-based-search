@@ -116,7 +116,7 @@ Each link is then set with either 100Mb or 1Gb connections.
 
 Visualized it looks like this, with red and blue indicating multiple VNR allocated paths.
 
-![](doc/images/readme-example.png)
+![](docs/images/readme-example.png)
 
 
 ### Virtual Network Request format
