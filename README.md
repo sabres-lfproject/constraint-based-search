@@ -54,7 +54,7 @@ Inputs:
 
 >  5: mapping.txt (`mapping_output_file`): the path to the file that contains the VNE mappings for each VNR.
 
->  6: 1.0 (suboptimality factor): the cost bound of the solution. Values > 1.0 trade solution cost for runtime.
+>  6: 1.0 (`suboptimality factor`): the cost bound of the solution. Values > 1.0 trade solution cost for runtime.
 
 
 ### Offline experiment example:
@@ -127,7 +127,7 @@ Then node lines: <node_loc_x>, <noc_loc_y>, <CPU_requirement>
 
 Then edge lines: <from_node>, <to_node>, <bandwidth_requirement>, <delay_requirement> (not used)
 
-Here is one such VNR using the SN from the above example which has been embedded onto the SN.
+Here is one such VNR using the SN from the above example- embedding as the path from node 1 to node 10.
 
 ```
 2 3 0 0 10 0 0

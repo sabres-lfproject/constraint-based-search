@@ -9,10 +9,6 @@
 #include "def.hpp"
 #include "simulator.hpp"
 
-using namespace std;
-
-#define CBS_solver false
-
 int main(int argc, char *argv[]) {
   int reqCount;
 
