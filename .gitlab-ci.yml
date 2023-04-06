@@ -10,7 +10,7 @@ build-code:
   stage: build
   before_script:
     - apt update
-    - apt install -y cmake make build-essential libboost-all-dev
+    - apt install -y cmake make build-essential libboost-all-dev clang-format
   script:
     - mkdir build
     - pushd build

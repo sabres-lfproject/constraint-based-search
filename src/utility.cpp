@@ -6,6 +6,7 @@
  */
 
 #include "utility.h"
+
 #include "def.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,32 +14,43 @@
 // Description:                                                              //
 ///////////////////////////////////////////////////////////////////////////////
 
-void saveMapping(VNRequest &VNR, SubstrateGraph &SG, string save_file_path, int VNR_id){
-    int i,j;
+void saveMapping(VNRequest &VNR, SubstrateGraph &SG, string save_file_path, int VNR_id) {
+  int i, j;
 
-    FILE * saveto = fopen(save_file_path.c_str(), "a");
-    fprintf(saveto, "VNR %2d: Node Mapping\n", VNR_id);
-    for (i = 0; i < VNR.nodeNum; i++) {
-        fprintf(saveto,"VNode: %2d @(%2d, %2d) CPU = %.4lf <--> PNode: %2d @(%2d, %2d) RCPU = %.4f \n",
-               i, VNR.nodes[i].x, VNR.nodes[i].y, VNR.nodes[i].cpu,
-                /*VNR.nodes[i].substrateID,*/ VNR.nodes[i].subNodeID,
-               SG.nodes[VNR.nodes[i].subNodeID].x, SG.nodes[VNR.nodes[i].subNodeID].y,
-               SG.nodes[VNR.nodes[i].subNodeID].rest_cpu);
+  FILE *saveto = fopen(save_file_path.c_str(), "a");
+  fprintf(saveto, "VNR %2d: Node Mapping\n", VNR_id);
+  for (i = 0; i < VNR.nodeNum; i++) {
+    fprintf(saveto,
+            "VNode: %2d @(%2d, %2d) CPU = %.4lf <--> PNode: %2d @(%2d, %2d) RCPU = %.4f \n",
+            i,
+            VNR.nodes[i].x,
+            VNR.nodes[i].y,
+            VNR.nodes[i].cpu,
+            /*VNR.nodes[i].substrateID,*/ VNR.nodes[i].subNodeID,
+            SG.nodes[VNR.nodes[i].subNodeID].x,
+            SG.nodes[VNR.nodes[i].subNodeID].y,
+            SG.nodes[VNR.nodes[i].subNodeID].rest_cpu);
+  }
+  fprintf(saveto, "VNR %2d: Edge Mapping\n", VNR_id);
+  for (i = 0; i < VNR.edgeNum; i++) {
+    fprintf(saveto,
+            "VEdge: %2d @(%2d, %2d) BW = %.4lf <--> PEdges:",
+            i,
+            VNR.edges[i].from,
+            VNR.edges[i].to,
+            VNR.edges[i].bw);
+    for (j = 0; j < VNR.edges[i].pathLen; j++) {
+      fprintf(saveto,
+              " %3d[%.4lf, %.4f] @(%2d, %2d)",
+              VNR.edges[i].subPath[j],
+              VNR.edges[i].subBW[j],
+              SG.edges[VNR.edges[i].subPath[j]].bw,
+              SG.edges[VNR.edges[i].subPath[j]].from,
+              SG.edges[VNR.edges[i].subPath[j]].to);
     }
-    fprintf(saveto, "VNR %2d: Edge Mapping\n", VNR_id);
-    for (i = 0; i < VNR.edgeNum; i++) {
-        fprintf(saveto,"VEdge: %2d @(%2d, %2d) BW = %.4lf <--> PEdges:",
-               i, VNR.edges[i].from, VNR.edges[i].to, VNR.edges[i].bw);
-        for (j = 0; j < VNR.edges[i].pathLen; j++) {
-            fprintf(saveto," %3d[%.4lf, %.4f] @(%2d, %2d)", VNR.edges[i].subPath[j],
-                   VNR.edges[i].subBW[j],SG.edges[VNR.edges[i].subPath[j]].bw,
-                   SG.edges[VNR.edges[i].subPath[j]].from,
-                   SG.edges[VNR.edges[i].subPath[j]].to);
-        }
-        fprintf(saveto,"\n");
-    }
-    fclose(saveto);
-
+    fprintf(saveto, "\n");
+  }
+  fclose(saveto);
 }
 
 void printMapping(VNRequest &VNR, SubstrateGraph &SG) {
@@ -49,28 +61,38 @@ void printMapping(VNRequest &VNR, SubstrateGraph &SG) {
   cout << "Node Mapping" << endl;
   for (i = 0; i < VNR.nodeNum; i++) {
     printf("VNode: %2d @(%2d, %2d) CPU = %.4lf <--> PNode: %2d @(%2d, %2d) RCPU = %.4f \n",
-        i, VNR.nodes[i].x, VNR.nodes[i].y, VNR.nodes[i].cpu,
-        /*VNR.nodes[i].substrateID,*/ VNR.nodes[i].subNodeID,
-        SG.nodes[VNR.nodes[i].subNodeID].x, SG.nodes[VNR.nodes[i].subNodeID].y,
-        SG.nodes[VNR.nodes[i].subNodeID].rest_cpu);
+           i,
+           VNR.nodes[i].x,
+           VNR.nodes[i].y,
+           VNR.nodes[i].cpu,
+           /*VNR.nodes[i].substrateID,*/ VNR.nodes[i].subNodeID,
+           SG.nodes[VNR.nodes[i].subNodeID].x,
+           SG.nodes[VNR.nodes[i].subNodeID].y,
+           SG.nodes[VNR.nodes[i].subNodeID].rest_cpu);
   }
 
   cout << "Edge Mapping" << endl;
   for (i = 0; i < VNR.edgeNum; i++) {
-    printf("VEdge: %2d @(%2d, %2d) BW = %.4lf <--> PEdges:",
-        i, VNR.edges[i].from, VNR.edges[i].to, VNR.edges[i].bw);
+    printf("VEdge: %2d @(%2d, %2d) BW = %.4lf <--> PEdges:", i, VNR.edges[i].from, VNR.edges[i].to, VNR.edges[i].bw);
     for (j = 0; j < VNR.edges[i].pathLen; j++) {
-      printf(" %3d[%.4lf, %.4f] @(%2d, %2d)", VNR.edges[i].subPath[j],
-          VNR.edges[i].subBW[j],SG.edges[VNR.edges[i].subPath[j]].bw,
-          SG.edges[VNR.edges[i].subPath[j]].from,
-          SG.edges[VNR.edges[i].subPath[j]].to);
+      printf(" %3d[%.4lf, %.4f] @(%2d, %2d)",
+             VNR.edges[i].subPath[j],
+             VNR.edges[i].subBW[j],
+             SG.edges[VNR.edges[i].subPath[j]].bw,
+             SG.edges[VNR.edges[i].subPath[j]].from,
+             SG.edges[VNR.edges[i].subPath[j]].to);
     }
     printf("\n");
   }
 }
 
-void getDifferentStress(SubstrateGraph &SG, double &mNS, double &aNS, double &mLS, double &aLS,
-    double &sdNS, double &sdLS) {
+void getDifferentStress(SubstrateGraph &SG,
+                        double &mNS,
+                        double &aNS,
+                        double &mLS,
+                        double &aLS,
+                        double &sdNS,
+                        double &sdLS) {
   int i;
   double tStress;
   mNS = mLS = aNS = aLS = sdNS = sdLS = 0;
@@ -106,9 +128,7 @@ void getDifferentStress(SubstrateGraph &SG, double &mNS, double &aNS, double &mL
   sdLS = sqrt((sdLS / SG.edgeNum));
 }
 
-double getRevenue(VNRequest &aRequest, double __MULT,
-    double &nodeRev, double &edgeRev) {
-
+double getRevenue(VNRequest &aRequest, double __MULT, double &nodeRev, double &edgeRev) {
   int i;
   nodeRev = edgeRev = 0;
 
@@ -123,9 +143,8 @@ double getRevenue(VNRequest &aRequest, double __MULT,
   return nodeRev + __MULT * edgeRev;
 }
 
-double getCost(VNRequest &VNR, SubstrateGraph &SG, double __MULT,
-    double &nodeCost, double &edgeCost, bool aOne, bool bOne) {
-
+double
+getCost(VNRequest &VNR, SubstrateGraph &SG, double __MULT, double &nodeCost, double &edgeCost, bool aOne, bool bOne) {
   int i, j;
   double temp;
   nodeCost = edgeCost = 0;
@@ -136,7 +155,7 @@ double getCost(VNRequest &VNR, SubstrateGraph &SG, double __MULT,
         * VNR.nodes[i].cpu;
     }
     else {*/
-      temp = VNR.nodes[i].cpu;
+    temp = VNR.nodes[i].cpu;
     //}
     nodeCost += temp;
   }
@@ -149,7 +168,7 @@ double getCost(VNRequest &VNR, SubstrateGraph &SG, double __MULT,
           * VNR.edges[i].subBW[j]);
       }
       else {*/
-        temp += VNR.edges[i].subBW[j];
+      temp += VNR.edges[i].subBW[j];
       //}
     }
     edgeCost += temp;
@@ -163,7 +182,7 @@ void randomPermutation(vector<int> &series) {
   int sLen = series.size();
   vector<int> temp(sLen, 0), ret;
 
-  while(sLen) {
+  while (sLen) {
     j = rand() % sLen;
     ret.push_back(series[j]);
     series[j] = series[--sLen];
@@ -178,29 +197,27 @@ void randomPermutation(vector<int> &series) {
 // Description:                                                              //
 ///////////////////////////////////////////////////////////////////////////////
 
-Node::Node(int _x, int _y, double _cpu) :
-  x(_x), y(_y), cpu(_cpu) {
-  if(DEBUG) {
+Node::Node(int _x, int _y, double _cpu) : x(_x), y(_y), cpu(_cpu) {
+  if (DEBUG) {
     cout << "Node" << endl;
   }
 }
 
 #ifdef MYCPP
-Node::Node(const Node &o) :
-  x(o.x), y(o.y), cpu(o.cpu){
-  if(DEBUG) {
+Node::Node(const Node &o) : x(o.x), y(o.y), cpu(o.cpu) {
+  if (DEBUG) {
     cout << "Node Copy" << endl;
   }
 }
 
 Node::~Node() {
-  if(DEBUG) {
+  if (DEBUG) {
     cout << "~Node" << endl;
   }
 }
 
-const Node& Node::operator =(const Node &o) {
-  if(DEBUG) {
+const Node &Node::operator=(const Node &o) {
+  if (DEBUG) {
     cout << "Node=" << endl;
   }
   if (this != &o) {
@@ -218,29 +235,27 @@ const Node& Node::operator =(const Node &o) {
 // Description:                                                              //
 ///////////////////////////////////////////////////////////////////////////////
 
-Edge::Edge(int _from, int _to, double _bw, double _dlay) :
-  from(_from), to(_to), bw(_bw), dlay(_dlay) {
-  if(DEBUG) {
+Edge::Edge(int _from, int _to, double _bw, double _dlay) : from(_from), to(_to), bw(_bw), dlay(_dlay) {
+  if (DEBUG) {
     cout << "Edge" << endl;
   }
 }
 
 #ifdef MYCPP
-Edge::Edge(const Edge &o) :
-  from(o.from), to(o.to), bw(o.bw), dlay(o.dlay) {
-  if(DEBUG) {
+Edge::Edge(const Edge &o) : from(o.from), to(o.to), bw(o.bw), dlay(o.dlay) {
+  if (DEBUG) {
     cout << "Edge Copy" << endl;
   }
 }
 
 Edge::~Edge() {
-  if(DEBUG) {
+  if (DEBUG) {
     cout << "~Edge" << endl;
   }
 }
 
-const Edge& Edge::operator=(const Edge &o) {
-  if(DEBUG) {
+const Edge &Edge::operator=(const Edge &o) {
+  if (DEBUG) {
     cout << "Edge=" << endl;
   }
   if (this != &o) {
@@ -259,10 +274,8 @@ const Edge& Edge::operator=(const Edge &o) {
 // Description:                                                              //
 ///////////////////////////////////////////////////////////////////////////////
 
-SubstrateGraph::SubstrateGraph(string _fileName, int _substrateID) :
-  fileName(_fileName), substrateID(_substrateID) {
-
-  if(DEBUG) {
+SubstrateGraph::SubstrateGraph(string _fileName, int _substrateID) : fileName(_fileName), substrateID(_substrateID) {
+  if (DEBUG) {
     cout << "SubGraph" << endl;
   }
 
@@ -279,7 +292,7 @@ SubstrateGraph::SubstrateGraph(string _fileName, int _substrateID) :
 
 #ifdef MYCPP
 SubstrateGraph::SubstrateGraph(const SubstrateGraph &o) {
-  if(DEBUG) {
+  if (DEBUG) {
     cout << "SubGraph Copy" << endl;
   }
 
@@ -288,16 +301,14 @@ SubstrateGraph::SubstrateGraph(const SubstrateGraph &o) {
   substrateID = o.substrateID;
   fileName = o.fileName;
 
-  //copy(o.nodes.begin(), o.nodes.end(), nodes.begin());
-  for (int i = 0; i < o.nodeNum; i++)
-    nodes.push_back(o.nodes[i]);
-  //copy(o.edges.begin(), o.edges.end(), edges.begin());
-  for (int i = 0; i < edgeNum; i++)
-    edges.push_back(o.edges[i]);
+  // copy(o.nodes.begin(), o.nodes.end(), nodes.begin());
+  for (int i = 0; i < o.nodeNum; i++) nodes.push_back(o.nodes[i]);
+  // copy(o.edges.begin(), o.edges.end(), edges.begin());
+  for (int i = 0; i < edgeNum; i++) edges.push_back(o.edges[i]);
 }
 
 SubstrateGraph::~SubstrateGraph() {
-  if(DEBUG) {
+  if (DEBUG) {
     cout << "~SubGraph" << endl;
   }
 
@@ -305,8 +316,8 @@ SubstrateGraph::~SubstrateGraph() {
   edges.clear();
 }
 
-const SubstrateGraph& SubstrateGraph::operator=(const SubstrateGraph &o) {
-  if(DEBUG) {
+const SubstrateGraph &SubstrateGraph::operator=(const SubstrateGraph &o) {
+  if (DEBUG) {
     cout << "SubGraph=" << endl;
   }
 
@@ -316,23 +327,20 @@ const SubstrateGraph& SubstrateGraph::operator=(const SubstrateGraph &o) {
     substrateID = o.substrateID;
     fileName = o.fileName;
 
-    //copy(o.nodes.begin(), o.nodes.end(), nodes.begin());
-    for (int i = 0; i < o.nodeNum; i++)
-      nodes.push_back(o.nodes[i]);
-    //copy(o.edges.begin(), o.edges.end(), edges.begin());
-    for (int i = 0; i < edgeNum; i++)
-      edges.push_back(o.edges[i]);
+    // copy(o.nodes.begin(), o.nodes.end(), nodes.begin());
+    for (int i = 0; i < o.nodeNum; i++) nodes.push_back(o.nodes[i]);
+    // copy(o.edges.begin(), o.edges.end(), edges.begin());
+    for (int i = 0; i < edgeNum; i++) edges.push_back(o.edges[i]);
   }
 
   return *this;
 }
 #endif
 
-
 void SubstrateGraph::printNodeStatus() {
   int i;
 
-  cout << "Substrate Graph: " << substrateID <<  " Node Status" << endl;
+  cout << "Substrate Graph: " << substrateID << " Node Status" << endl;
   for (i = 0; i < nodeNum; i++) {
     printf("(%2d, %6.3lf)", nodes[i].count, nodes[i].rest_cpu);
   }
@@ -342,7 +350,7 @@ void SubstrateGraph::printNodeStatus() {
 void SubstrateGraph::printEdgeStatus() {
   int i;
 
-  cout << "Substrate Graph: " << substrateID <<  " Edge Status" << endl;
+  cout << "Substrate Graph: " << substrateID << " Edge Status" << endl;
   for (i = 0; i < edgeNum; i++) {
     printf("(%2d, %6.3lf)", edges[i].count, edges[i].rest_bw);
   }
@@ -355,11 +363,13 @@ void SubstrateGraph::addVNMapping(VNRequest &aRequest) {
   // add to the substrate network nodes
   for (i = 0; i < aRequest.nodeNum; i++) {
     if (aRequest.nodes[i].substrateID == substrateID) {
-//      cout << "Before adding rest_cpu to node: " << aRequest.nodes[i].subNodeID << " value: " << nodes[aRequest.nodes[i].subNodeID].rest_cpu << endl;
-//      cout << "Full CPU: " << nodes[aRequest.nodes[i].subNodeID].cpu << endl;
+      //      cout << "Before adding rest_cpu to node: " << aRequest.nodes[i].subNodeID << " value: " <<
+      //      nodes[aRequest.nodes[i].subNodeID].rest_cpu << endl; cout << "Full CPU: " <<
+      //      nodes[aRequest.nodes[i].subNodeID].cpu << endl;
       nodes[aRequest.nodes[i].subNodeID].rest_cpu -= aRequest.nodes[i].cpu;
-//      cout << "After adding rest_cpu to node: " << aRequest.nodes[i].subNodeID << " value: " << nodes[aRequest.nodes[i].subNodeID].rest_cpu << endl;
-      //assert(fabs(nodes[aRequest.nodes[i].subNodeID].rest_cpu + EPSILON) >= fabs(0));
+      //      cout << "After adding rest_cpu to node: " << aRequest.nodes[i].subNodeID << " value: " <<
+      //      nodes[aRequest.nodes[i].subNodeID].rest_cpu << endl;
+      // assert(fabs(nodes[aRequest.nodes[i].subNodeID].rest_cpu + EPSILON) >= fabs(0));
       nodes[aRequest.nodes[i].subNodeID].count++;
 
       // save request information
@@ -373,12 +383,14 @@ void SubstrateGraph::addVNMapping(VNRequest &aRequest) {
   for (i = 0; i < aRequest.edgeNum; i++) {
     for (j = 0; j < aRequest.edges[i].pathLen; j++) {
       if (aRequest.edges[i].substrateID == substrateID) {
-//        cout << "Before adding rest_bw to edge: " << aRequest.edges[i].subPath[j] << " value: " << edges[aRequest.edges[i].subPath[j]].rest_bw << endl;
-//        cout << "Full bandwidth: " << edges[aRequest.edges[i].subPath[j]].bw << endl;
+        //        cout << "Before adding rest_bw to edge: " << aRequest.edges[i].subPath[j] << " value: " <<
+        //        edges[aRequest.edges[i].subPath[j]].rest_bw << endl; cout << "Full bandwidth: " <<
+        //        edges[aRequest.edges[i].subPath[j]].bw << endl;
         edges[aRequest.edges[i].subPath[j]].rest_bw -= aRequest.edges[i].subBW[j];
-        //assert(fabs(edges[aRequest.edges[i].subPath[j]].rest_bw + EPSILON) >= fabs(0));
+        // assert(fabs(edges[aRequest.edges[i].subPath[j]].rest_bw + EPSILON) >= fabs(0));
         edges[aRequest.edges[i].subPath[j]].count++;
-//        cout << "After adding rest_bw to edge: " << aRequest.edges[i].subPath[j] << " value: " << edges[aRequest.edges[i].subPath[j]].rest_bw << endl;
+        //        cout << "After adding rest_bw to edge: " << aRequest.edges[i].subPath[j] << " value: " <<
+        //        edges[aRequest.edges[i].subPath[j]].rest_bw << endl;
         // save request information
         edges[aRequest.edges[i].subPath[j]].req_ids.push_back(aRequest.reqID);
         edges[aRequest.edges[i].subPath[j]].edge_ids.push_back(i);
@@ -397,10 +409,10 @@ void SubstrateGraph::removeVNMapping(const VNRequest &aRequest) {
   for (i = 0; i < aRequest.nodeNum; i++) {
     if (aRequest.nodes[i].substrateID == substrateID) {
       nodes[aRequest.nodes[i].subNodeID].rest_cpu += aRequest.nodes[i].cpu;
-      //assert(nodes[aRequest.nodes[i].subNodeID].rest_cpu <= nodes[aRequest.nodes[i].subNodeID].cpu + EPSILON);
+      // assert(nodes[aRequest.nodes[i].subNodeID].rest_cpu <= nodes[aRequest.nodes[i].subNodeID].cpu + EPSILON);
       nodes[aRequest.nodes[i].subNodeID].count--;
 
-      //remove request information
+      // remove request information
       iter1 = nodes[aRequest.nodes[i].subNodeID].req_ids.begin();
       iter2 = nodes[aRequest.nodes[i].subNodeID].node_ids.begin();
       iter3 = nodes[aRequest.nodes[i].subNodeID].used_cpu.begin();
@@ -425,10 +437,10 @@ void SubstrateGraph::removeVNMapping(const VNRequest &aRequest) {
     for (j = 0; j < aRequest.edges[i].pathLen; j++) {
       if (aRequest.edges[i].substrateID == substrateID) {
         edges[aRequest.edges[i].subPath[j]].rest_bw += aRequest.edges[i].subBW[j];
-        //assert(edges[aRequest.edges[i].subPath[j]].rest_bw <= edges[aRequest.edges[i].subPath[j]].bw + EPSILON);
+        // assert(edges[aRequest.edges[i].subPath[j]].rest_bw <= edges[aRequest.edges[i].subPath[j]].bw + EPSILON);
         edges[aRequest.edges[i].subPath[j]].count--;
 
-        //remove request information
+        // remove request information
         iter1 = edges[aRequest.edges[i].subPath[j]].req_ids.begin();
         iter2 = edges[aRequest.edges[i].subPath[j]].edge_ids.begin();
         iter3 = edges[aRequest.edges[i].subPath[j]].used_bw.begin();
@@ -449,22 +461,18 @@ void SubstrateGraph::removeVNMapping(const VNRequest &aRequest) {
   }
 }
 
-
 double SubstrateGraph::getNodePotential(int nodeID) {
   // TODO: implement better node potential function
 
   return nodes[nodeID].rest_cpu;
 }
 
-int SubstrateGraph::findNodesWithinConstraints(Node &aNode, int reqID, int maxD,
-    vector<int> & validNodeIDs) {
-
+int SubstrateGraph::findNodesWithinConstraints(Node &aNode, int reqID, int maxD, vector<int> &validNodeIDs) {
   int i, count = 0;
   validNodeIDs.clear();
 
   for (i = 0; i < nodeNum; i++) {
-    if ((nodes[i].distanceFrom(aNode) <= maxD) &&
-        (nodes[i].rest_cpu >= aNode.cpu) && (nodes[i].touched == false)) {
+    if ((nodes[i].distanceFrom(aNode) <= maxD) && (nodes[i].rest_cpu >= aNode.cpu) && (nodes[i].touched == false)) {
       validNodeIDs.push_back(i);
       count++;
     }
@@ -472,7 +480,6 @@ int SubstrateGraph::findNodesWithinConstraints(Node &aNode, int reqID, int maxD,
 
   return count;
 }
-
 
 int SubstrateGraph::initGraph() {
   int i;
@@ -496,7 +503,7 @@ int SubstrateGraph::initGraph() {
   for (i = 0; i < nodeNum; i++) {
     fscanf(fp, "%d %d %lf", &x, &y, &cpu);
     nodes.push_back(SubstrateNode(x, y, cpu));
-    //printf("%d %d %lf\n", x, y, cpu);
+    // printf("%d %d %lf\n", x, y, cpu);
     nodes[i].rest_cpu = cpu;
   }
 
@@ -504,7 +511,7 @@ int SubstrateGraph::initGraph() {
   for (i = 0; i < edgeNum; i++) {
     fscanf(fp, "%d %d %lf %lf", &from, &to, &bw, &dlay);
     edges.push_back(SubstrateEdge(from, to, bw, dlay));
-    //printf("%d %d %lf %lf\n", from, to, bw, dlay);
+    // printf("%d %d %lf %lf\n", from, to, bw, dlay);
     edges[i].rest_bw = bw;
 
     // save edge information in nodes
@@ -526,16 +533,13 @@ int SubstrateGraph::initGraph() {
   return SUCCESS;
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // Class      : VNRequest                                                    //
 // Description:                                                              //
 ///////////////////////////////////////////////////////////////////////////////
 
-VNRequest::VNRequest(string _fileName, int _reqID) :
-  fileName(_fileName), reqID(_reqID) {
-  if(DEBUG) {
+VNRequest::VNRequest(string _fileName, int _reqID) : fileName(_fileName), reqID(_reqID) {
+  if (DEBUG) {
     cout << "VNReq" << endl;
   }
 
@@ -549,7 +553,7 @@ VNRequest::VNRequest(string _fileName, int _reqID) :
 
 #ifdef MYCPP
 VNRequest::VNRequest(const VNRequest &o) {
-  if(DEBUG) {
+  if (DEBUG) {
     cout << "VNReq Copy" << endl;
   }
 
@@ -565,24 +569,22 @@ VNRequest::VNRequest(const VNRequest &o) {
   topology = o.topology;
   maxD = o.maxD;
 
-  //copy(o.nodes.begin(), o.nodes.end(), nodes.begin());
-  for (int i = 0; i < o.nodeNum; i++)
-    nodes.push_back(o.nodes[i]);
-  //copy(o.edges.begin(), o.edges.end(), edges.begin());
-  for (int i = 0; i < edgeNum; i++)
-    edges.push_back(o.edges[i]);
+  // copy(o.nodes.begin(), o.nodes.end(), nodes.begin());
+  for (int i = 0; i < o.nodeNum; i++) nodes.push_back(o.nodes[i]);
+  // copy(o.edges.begin(), o.edges.end(), edges.begin());
+  for (int i = 0; i < edgeNum; i++) edges.push_back(o.edges[i]);
 }
 
 VNRequest::~VNRequest() {
-  if(DEBUG) {
+  if (DEBUG) {
     cout << "~VNReq" << endl;
   }
   nodes.clear();
   edges.clear();
 }
 
-const VNRequest& VNRequest::operator=(const VNRequest &o) {
-  if(DEBUG) {
+const VNRequest &VNRequest::operator=(const VNRequest &o) {
+  if (DEBUG) {
     cout << "VNReq=" << endl;
   }
 
@@ -599,12 +601,10 @@ const VNRequest& VNRequest::operator=(const VNRequest &o) {
     topology = o.topology;
     maxD = o.maxD;
 
-    //copy(o.nodes.begin(), o.nodes.end(), nodes.begin());
-    for (int i = 0; i < o.nodeNum; i++)
-      nodes.push_back(o.nodes[i]);
-    //copy(o.edges.begin(), o.edges.end(), edges.begin());
-    for (int i = 0; i < edgeNum; i++)
-      edges.push_back(o.edges[i]);
+    // copy(o.nodes.begin(), o.nodes.end(), nodes.begin());
+    for (int i = 0; i < o.nodeNum; i++) nodes.push_back(o.nodes[i]);
+    // copy(o.edges.begin(), o.edges.end(), edges.begin());
+    for (int i = 0; i < edgeNum; i++) edges.push_back(o.edges[i]);
   }
 
   return *this;
@@ -627,21 +627,20 @@ int VNRequest::initGraph() {
     return COULD_NOT_OPEN_FILE;
   }
 
-  fscanf(fp, "%d %d %d %d %d %d %d", &nodeNum, &edgeNum, &split, &time,
-      &duration, &topology, &maxD);
+  fscanf(fp, "%d %d %d %d %d %d %d", &nodeNum, &edgeNum, &split, &time, &duration, &topology, &maxD);
 
   // read nodes
   for (i = 0; i < nodeNum; i++) {
     fscanf(fp, "%d %d %lf", &x, &y, &cpu);
     nodes.push_back(VNNode(x, y, cpu));
-    //printf("%d %d %lf\n", x, y, cpu);
+    // printf("%d %d %lf\n", x, y, cpu);
   }
 
   // read edges
   for (i = 0; i < edgeNum; i++) {
     fscanf(fp, "%d %d %lf %lf", &from, &to, &bw, &dlay);
     edges.push_back(VNEdge(from, to, bw, dlay));
-    //printf("%d %d %lf %lf\n", from, to, bw, dlay);
+    // printf("%d %d %lf %lf\n", from, to, bw, dlay);
 
     // save edge information in nodes
     nodes[from].edgeIDs.push_back(i);
@@ -714,9 +713,8 @@ void VNRequest::sortEdgesDescending(vector<int> &edgeProcessOrder) {
 // Description:                                                              //
 ///////////////////////////////////////////////////////////////////////////////
 
-SubstrateNode::SubstrateNode(int _x, int _y, double _cpu) :
-  Node(_x, _y, _cpu) {
-  if(DEBUG) {
+SubstrateNode::SubstrateNode(int _x, int _y, double _cpu) : Node(_x, _y, _cpu) {
+  if (DEBUG) {
     cout << "SubNode" << endl;
   }
 
@@ -729,9 +727,8 @@ SubstrateNode::SubstrateNode(int _x, int _y, double _cpu) :
 }
 
 #ifdef MYCPP
-SubstrateNode::SubstrateNode(const SubstrateNode &o) :
-  Node(o), count(o.count), rest_cpu(o.rest_cpu) {
-  if(DEBUG) {
+SubstrateNode::SubstrateNode(const SubstrateNode &o) : Node(o), count(o.count), rest_cpu(o.rest_cpu) {
+  if (DEBUG) {
     cout << "SubNode Copy" << endl;
   }
 
@@ -746,7 +743,7 @@ SubstrateNode::SubstrateNode(const SubstrateNode &o) :
 }
 
 SubstrateNode::~SubstrateNode() {
-  if(DEBUG) {
+  if (DEBUG) {
     cout << "~SubNode" << endl;
   }
   edgeIDs.clear();
@@ -755,8 +752,8 @@ SubstrateNode::~SubstrateNode() {
   used_cpu.clear();
 }
 
-const SubstrateNode& SubstrateNode::operator=(const SubstrateNode &o) {
-  if(DEBUG) {
+const SubstrateNode &SubstrateNode::operator=(const SubstrateNode &o) {
+  if (DEBUG) {
     cout << "SubNode=" << endl;
   }
 
@@ -781,13 +778,11 @@ const SubstrateNode& SubstrateNode::operator=(const SubstrateNode &o) {
 #endif
 
 double SubstrateNode::distanceFrom(Node &aNode) {
-  return sqrt((x - aNode.x) * (x - aNode.x) +
-      (y - aNode.y) * (y - aNode.y));
+  return sqrt((x - aNode.x) * (x - aNode.x) + (y - aNode.y) * (y - aNode.y));
 }
 
 double SubstrateNode::distanceFrom(SubstrateNode &aNode) {
-  return sqrt((x - aNode.x) * (x - aNode.x) +
-      (y - aNode.y) * (y - aNode.y));
+  return sqrt((x - aNode.x) * (x - aNode.x) + (y - aNode.y) * (y - aNode.y));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -795,9 +790,8 @@ double SubstrateNode::distanceFrom(SubstrateNode &aNode) {
 // Description:                                                              //
 ///////////////////////////////////////////////////////////////////////////////
 
-SubstrateEdge::SubstrateEdge(int _from, int _to, double _bw, double _dlay) :
-  Edge(_from, _to, _bw, _dlay) {
-  if(DEBUG) {
+SubstrateEdge::SubstrateEdge(int _from, int _to, double _bw, double _dlay) : Edge(_from, _to, _bw, _dlay) {
+  if (DEBUG) {
     cout << "SubEdge" << endl;
   }
   count = 0;
@@ -809,9 +803,8 @@ SubstrateEdge::SubstrateEdge(int _from, int _to, double _bw, double _dlay) :
 }
 
 #ifdef MYCPP
-SubstrateEdge::SubstrateEdge(const SubstrateEdge &o) :
-  Edge(o), count(o.count), rest_bw(o.rest_bw) {
-  if(DEBUG) {
+SubstrateEdge::SubstrateEdge(const SubstrateEdge &o) : Edge(o), count(o.count), rest_bw(o.rest_bw) {
+  if (DEBUG) {
     cout << "SubEdge Copy" << endl;
   }
 
@@ -824,7 +817,7 @@ SubstrateEdge::SubstrateEdge(const SubstrateEdge &o) :
 }
 
 SubstrateEdge::~SubstrateEdge() {
-  if(DEBUG) {
+  if (DEBUG) {
     cout << "~SubEdge" << endl;
   }
   req_ids.clear();
@@ -832,8 +825,8 @@ SubstrateEdge::~SubstrateEdge() {
   used_bw.clear();
 }
 
-const SubstrateEdge& SubstrateEdge::operator=(const SubstrateEdge &o) {
-  if(DEBUG) {
+const SubstrateEdge &SubstrateEdge::operator=(const SubstrateEdge &o) {
+  if (DEBUG) {
     cout << "SubEdge=" << endl;
   }
   if (this != &o) {
@@ -859,9 +852,8 @@ const SubstrateEdge& SubstrateEdge::operator=(const SubstrateEdge &o) {
 // Description:                                                              //
 ///////////////////////////////////////////////////////////////////////////////
 
-VNNode::VNNode(int _x, int _y, double _cpu) :
-  Node(_x, _y, _cpu) {
-  if(DEBUG) {
+VNNode::VNNode(int _x, int _y, double _cpu) : Node(_x, _y, _cpu) {
+  if (DEBUG) {
     cout << "VNNode" << endl;
   }
 
@@ -870,9 +862,8 @@ VNNode::VNNode(int _x, int _y, double _cpu) :
 }
 
 #ifdef MYCPP
-VNNode::VNNode(const VNNode &o) :
-  Node(o), substrateID(o.substrateID), subNodeID(o.subNodeID) {
-  if(DEBUG) {
+VNNode::VNNode(const VNNode &o) : Node(o), substrateID(o.substrateID), subNodeID(o.subNodeID) {
+  if (DEBUG) {
     cout << "VNNode Copy" << endl;
   }
 
@@ -881,15 +872,15 @@ VNNode::VNNode(const VNNode &o) :
 }
 
 VNNode::~VNNode() {
-  if(DEBUG) {
+  if (DEBUG) {
     cout << "~VNNode" << endl;
   }
 
   edgeIDs.clear();
 }
 
-const VNNode& VNNode::operator=(const VNNode &o) {
-  if(DEBUG) {
+const VNNode &VNNode::operator=(const VNNode &o) {
+  if (DEBUG) {
     cout << "VNNode=" << endl;
   }
 
@@ -912,9 +903,8 @@ const VNNode& VNNode::operator=(const VNNode &o) {
 // Description:                                                              //
 ///////////////////////////////////////////////////////////////////////////////
 
-VNEdge::VNEdge(int _from, int _to, double _bw, double _dlay) :
-  Edge(_from, _to, _bw, _dlay) {
-  if(DEBUG) {
+VNEdge::VNEdge(int _from, int _to, double _bw, double _dlay) : Edge(_from, _to, _bw, _dlay) {
+  if (DEBUG) {
     cout << "VNEdge" << endl;
   }
 
@@ -927,10 +917,8 @@ VNEdge::VNEdge(int _from, int _to, double _bw, double _dlay) :
 }
 
 #ifdef MYCPP
-VNEdge::VNEdge(const VNEdge &o) :
-  Edge(o), substrateID(o.substrateID), pathLen(o.pathLen),
-  pathDelay(o.pathDelay) {
-  if(DEBUG) {
+VNEdge::VNEdge(const VNEdge &o) : Edge(o), substrateID(o.substrateID), pathLen(o.pathLen), pathDelay(o.pathDelay) {
+  if (DEBUG) {
     cout << "VNEdge Copy" << endl;
   }
 
@@ -941,7 +929,7 @@ VNEdge::VNEdge(const VNEdge &o) :
 }
 
 VNEdge::~VNEdge() {
-  if(DEBUG) {
+  if (DEBUG) {
     cout << "~VNEdge" << endl;
   }
 
@@ -949,8 +937,8 @@ VNEdge::~VNEdge() {
   subBW.clear();
 }
 
-const VNEdge& VNEdge::operator=(const VNEdge &o) {
-  if(DEBUG) {
+const VNEdge &VNEdge::operator=(const VNEdge &o) {
+  if (DEBUG) {
     cout << "VNEdge=" << endl;
   }
 
