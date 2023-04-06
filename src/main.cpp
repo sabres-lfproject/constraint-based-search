@@ -31,11 +31,6 @@ int main(int argc, char *argv[]) {
     cerr << "<rD>: directory containing the requests " << endl;
     cerr << "<oF>: output file to dump the results" << endl;
     cerr << "<oM>: where to output the mapping" << endl;
-    //    cerr << "<nM>: node mapping method (7: VNE-CBS)" << endl;
-    //    cerr << "<eM>: edge mapping method (Not supported: this version is for VNE-CBS only. Use default value 0)" <<
-    //    endl; cerr << "<fS>: whether to ignore (1) or respect(0) VNR's splitting choice [eM must be 5]" << endl; cerr
-    //    << "<lB>: load balancing (1: alpha = beta = 1. 0: alpha = beta = residue)" << endl; cerr << "<MT>: multiplier
-    //    in the revenue and cost functions" << endl;
     cerr << "<w>: suboptimal bound" << endl;
     exit(1);
   }
@@ -81,14 +76,13 @@ int main(int argc, char *argv[]) {
   int curVNR;
   bool requestAccepted = false;
 
-  int nodeMapFailCount = 0, edgeMapFailCount = 0, totalMapFailCount = 0;
+  int mapFailCount = 0;
 
   srand((unsigned)time(NULL));  // initialize random number generator
 
   // read all the requests, one by one.
   for (i = 0; i < reqCount; i++) {
-    std::string reqFileName = reqFolderName + "/req" + std::to_string(i);
-    // sprintf(reqFileName, "%s/req%d.txt", reqFolderName, i);
+    std::string reqFileName = reqFolderName + "/req" + std::to_string(i) + ".vnr";
 
     // save the request in the list.
     VNR.push_back(VNRequest(reqFileName.c_str(), i));
@@ -116,7 +110,7 @@ int main(int argc, char *argv[]) {
         cbs.count_num = 0;
         vector<Path> mapping = cbs.find_solution(SG, VNR[curVNR], sub_w);
         if (mapping.empty()) {
-          totalMapFailCount++;
+          mapFailCount++;
           goto LABEL_MAP_FAILED;
         } else {
           // update VNR info, CPU, BW etc.
@@ -126,7 +120,7 @@ int main(int argc, char *argv[]) {
 
       } else {
         cerr << "Invalid Parameter" << endl;
-        totalMapFailCount++;
+        mapFailCount++;
         goto LABEL_MAP_FAILED;
       }
 
@@ -167,11 +161,11 @@ int main(int argc, char *argv[]) {
     mySim.pop();
   }
 
-  cout << "Node Mapping Failed: " << nodeMapFailCount << endl;
-  cout << "Edge Mapping Failed: " << edgeMapFailCount << endl;
-  cout << "Mapping Failed: " << totalMapFailCount << endl;
+  //cout << "Node Mapping Failed: " << nodeMapFailCount << endl;
+  //cout << "Edge Mapping Failed: " << edgeMapFailCount << endl;
+  cout << "Mapping Failed: " << mapFailCount << endl;
 
   fclose(outputFP);
 
-  return 0;
+  exit(mapFailCount);
 }

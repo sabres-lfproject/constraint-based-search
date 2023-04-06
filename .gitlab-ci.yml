@@ -36,11 +36,8 @@ linter:
 
 test-code:
   stage: test
-  before_script:
-    - apt update
-    - apt-get update
   script:
-    - echo ""
+    - for i in {0..20}; do echo "examples/offline-test/$i.vnr"; echo `./build/cbs 1 examples/offline-test/$i examples/sub.txt test.out mapping.txt 1.0 || exit 1`; echo ""; done
   dependencies:
     - build-code
   tags:

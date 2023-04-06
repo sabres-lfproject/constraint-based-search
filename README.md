@@ -34,21 +34,21 @@ make
 
 ## Running
 
-We've provided one substrate network file `sub.txt` and example VNRs in the `test-vnr` directory.  Below are examples using the online and offline uses.
+We've provided one substrate network file `sub.txt` and example VNRs in the `examples` directory.  Below are examples using the online and offline uses.
 
 ### Online experiment example
 
 ```
-./build/cbs 20 test-vnr/online-test test-vnr/sub.txt test.out mapping.txt 1.0
+./build/cbs 20 examples/online-test examples/sub.txt test.out mapping.txt 1.0
 ```
 
 Inputs:
 
 >  1: 20 (`num_vnr`):  the number of VNRs to use in experiment. 1 for offline setting. 
 
->  2: test-vnr/online-test (`vnr_folder`): the path to the folder of VNRs.
+>  2: examples/online-test (`vnr_folder`): the path to the folder of VNRs.
 
->  3: test-vnr/sub.txt (`substrate_net_file`): the path to the substrate network file. 
+>  3: examples/sub.txt (`substrate_net_file`): the path to the substrate network file. 
 
 >  4: test.out (`output_file`): the path to the file that contains the output information, such as cost and runtime.
 
@@ -60,7 +60,7 @@ Inputs:
 ### Offline experiment example:
 
 ```
-./build/cbs 1 test-vnr/offline-test/0 test-vnr/sub.txt test.out mapping.txt 1.0
+./build/cbs 1 examples/offline-test/0 examples/sub.txt test.out mapping.txt 1.0
 ```
 
 ### Substrate Network format
