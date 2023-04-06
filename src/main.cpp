@@ -161,8 +161,6 @@ int main(int argc, char *argv[]) {
     mySim.pop();
   }
 
-  //cout << "Node Mapping Failed: " << nodeMapFailCount << endl;
-  //cout << "Edge Mapping Failed: " << edgeMapFailCount << endl;
   cout << "Mapping Failed: " << mapFailCount << endl;
 
   fclose(outputFP);
