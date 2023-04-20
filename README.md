@@ -32,6 +32,14 @@ cmake ..
 make
 ```
 
+## Commiting
+
+Before commiting code, ensure that the code has been clang-formatted.
+
+```
+clang-format -style=file --dry-run --Werror src/*.hpp src/*.cpp
+```
+
 ## Running
 
 We've provided one substrate network file `sub.txt` and example VNRs in the `examples` directory.  Below are examples using the online and offline uses.

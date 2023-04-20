@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
   sub_w = atof(argv[6]);  // suboptimal bound for cbs.
   // load network graph.
   SubstrateGraph SG(sn_graph_path, 0);
-  bool json_out = (atoi(argv[7])==0) ? false : true;
+  bool json_out = (atoi(argv[7]) == 0) ? false : true;
 
   // vetor stores VNR requests.
   vector<VNRequest> VNR;

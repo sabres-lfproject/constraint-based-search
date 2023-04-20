@@ -18,7 +18,7 @@ void saveMapping(VNRequest &VNR, SubstrateGraph &SG, string save_file_path, int 
   int i, j;
   FILE *saveto = fopen(save_file_path.c_str(), "w");
 
-  if (! json_out) {
+  if (!json_out) {
     fprintf(saveto, "VNR %2d: Node Mapping\n", VNR_id);
     for (i = 0; i < VNR.nodeNum; i++) {
       fprintf(saveto,
@@ -56,23 +56,22 @@ void saveMapping(VNRequest &VNR, SubstrateGraph &SG, string save_file_path, int 
     fprintf(saveto, "\t\"nodes\": [\n");
     for (i = 0; i < VNR.nodeNum; i++) {
       fprintf(saveto, "\t\t{\"vnf\": %d, \"vim\": %d}", i, VNR.nodes[i].subNodeID);
-      if (i+1 < VNR.nodeNum ) {
-      	fprintf(saveto, ",");
-      } 
+      if ((i + 1) < VNR.nodeNum) {
+        fprintf(saveto, ",");
+      }
       fprintf(saveto, "\n");
     }
     fprintf(saveto, "\t],\n");
     fprintf(saveto, "\t\"edges\": [\n");
     for (i = 0; i < VNR.edgeNum; i++) {
       fprintf(saveto, "\t\t{\"src\": %d, \"dst\": %d}", VNR.edges[i].from, VNR.edges[i].to);
-      if (i+1 < VNR.edgeNum ) {
-      	fprintf(saveto, ",");
-      } 
+      if ((i + 1) < VNR.edgeNum) {
+        fprintf(saveto, ",");
+      }
       fprintf(saveto, "\n");
     }
     fprintf(saveto, "\t]\n");
     fprintf(saveto, "}\n");
-  
   }
   fclose(saveto);
 }
