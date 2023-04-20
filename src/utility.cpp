@@ -14,41 +14,65 @@
 // Description:                                                              //
 ///////////////////////////////////////////////////////////////////////////////
 
-void saveMapping(VNRequest &VNR, SubstrateGraph &SG, string save_file_path, int VNR_id) {
+void saveMapping(VNRequest &VNR, SubstrateGraph &SG, string save_file_path, int VNR_id, bool json_out) {
   int i, j;
+  FILE *saveto = fopen(save_file_path.c_str(), "w");
 
-  FILE *saveto = fopen(save_file_path.c_str(), "a");
-  fprintf(saveto, "VNR %2d: Node Mapping\n", VNR_id);
-  for (i = 0; i < VNR.nodeNum; i++) {
-    fprintf(saveto,
-            "VNode: %2d @(%2d, %2d) CPU = %.4lf <--> PNode: %2d @(%2d, %2d) RCPU = %.4f \n",
-            i,
-            VNR.nodes[i].x,
-            VNR.nodes[i].y,
-            VNR.nodes[i].cpu,
-            /*VNR.nodes[i].substrateID,*/ VNR.nodes[i].subNodeID,
-            SG.nodes[VNR.nodes[i].subNodeID].x,
-            SG.nodes[VNR.nodes[i].subNodeID].y,
-            SG.nodes[VNR.nodes[i].subNodeID].rest_cpu);
-  }
-  fprintf(saveto, "VNR %2d: Edge Mapping\n", VNR_id);
-  for (i = 0; i < VNR.edgeNum; i++) {
-    fprintf(saveto,
-            "VEdge: %2d @(%2d, %2d) BW = %.4lf <--> PEdges:",
-            i,
-            VNR.edges[i].from,
-            VNR.edges[i].to,
-            VNR.edges[i].bw);
-    for (j = 0; j < VNR.edges[i].pathLen; j++) {
+  if (! json_out) {
+    fprintf(saveto, "VNR %2d: Node Mapping\n", VNR_id);
+    for (i = 0; i < VNR.nodeNum; i++) {
       fprintf(saveto,
-              " %3d[%.4lf, %.4f] @(%2d, %2d)",
-              VNR.edges[i].subPath[j],
-              VNR.edges[i].subBW[j],
-              SG.edges[VNR.edges[i].subPath[j]].bw,
-              SG.edges[VNR.edges[i].subPath[j]].from,
-              SG.edges[VNR.edges[i].subPath[j]].to);
+              "VNode: %2d @(%2d, %2d) CPU = %.4lf <--> PNode: %2d @(%2d, %2d) RCPU = %.4f \n",
+              i,
+              VNR.nodes[i].x,
+              VNR.nodes[i].y,
+              VNR.nodes[i].cpu,
+              /*VNR.nodes[i].substrateID,*/ VNR.nodes[i].subNodeID,
+              SG.nodes[VNR.nodes[i].subNodeID].x,
+              SG.nodes[VNR.nodes[i].subNodeID].y,
+              SG.nodes[VNR.nodes[i].subNodeID].rest_cpu);
     }
-    fprintf(saveto, "\n");
+    fprintf(saveto, "VNR %2d: Edge Mapping\n", VNR_id);
+    for (i = 0; i < VNR.edgeNum; i++) {
+      fprintf(saveto,
+              "VEdge: %2d @(%2d, %2d) BW = %.4lf <--> PEdges:",
+              i,
+              VNR.edges[i].from,
+              VNR.edges[i].to,
+              VNR.edges[i].bw);
+      for (j = 0; j < VNR.edges[i].pathLen; j++) {
+        fprintf(saveto,
+                " %3d[%.4lf, %.4f] @(%2d, %2d)",
+                VNR.edges[i].subPath[j],
+                VNR.edges[i].subBW[j],
+                SG.edges[VNR.edges[i].subPath[j]].bw,
+                SG.edges[VNR.edges[i].subPath[j]].from,
+                SG.edges[VNR.edges[i].subPath[j]].to);
+      }
+      fprintf(saveto, "\n");
+    }
+  } else {
+    fprintf(saveto, "{\n");
+    fprintf(saveto, "\t\"nodes\": [\n");
+    for (i = 0; i < VNR.nodeNum; i++) {
+      fprintf(saveto, "\t\t{\"vnf\": %d, \"vim\": %d}", i, VNR.nodes[i].subNodeID);
+      if (i+1 < VNR.nodeNum ) {
+      	fprintf(saveto, ",");
+      } 
+      fprintf(saveto, "\n");
+    }
+    fprintf(saveto, "\t],\n");
+    fprintf(saveto, "\t\"edges\": [\n");
+    for (i = 0; i < VNR.edgeNum; i++) {
+      fprintf(saveto, "\t\t{\"src\": %d, \"dst\": %d}", VNR.edges[i].from, VNR.edges[i].to);
+      if (i+1 < VNR.edgeNum ) {
+      	fprintf(saveto, ",");
+      } 
+      fprintf(saveto, "\n");
+    }
+    fprintf(saveto, "\t]\n");
+    fprintf(saveto, "}\n");
+  
   }
   fclose(saveto);
 }

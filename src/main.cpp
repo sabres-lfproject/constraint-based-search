@@ -20,14 +20,15 @@ int main(int argc, char *argv[]) {
   int nodeMapMethod;
   double nodeRev, edgeRev, totRev, nodeCost, edgeCost, totCost;
   string sn_graph_path;
-  if (argc != 7) {
-    cerr << "usage: SIM <rC> <rSub> <rD> <oF> <oM> <nM> <eM> <fS> <lB> <MT>" << endl;
+  if (argc != 8) {
+    cerr << "usage: SIM <rC> <rD> <rSub> <oF> <oM> <w>" << endl;
     cerr << "<rC>: total number of requests" << endl;
-    cerr << "<rSub>: the substrate network file path" << endl;
     cerr << "<rD>: directory containing the requests " << endl;
+    cerr << "<rSub>: the substrate network file path" << endl;
     cerr << "<oF>: output file to dump the results" << endl;
     cerr << "<oM>: where to output the mapping" << endl;
     cerr << "<w>: suboptimal bound" << endl;
+    cerr << "<json>: json output mapping file" << endl;
     exit(1);
   }
 
@@ -45,6 +46,7 @@ int main(int argc, char *argv[]) {
   sub_w = atof(argv[6]);  // suboptimal bound for cbs.
   // load network graph.
   SubstrateGraph SG(sn_graph_path, 0);
+  bool json_out = (atoi(argv[7])==0) ? false : true;
 
   // vetor stores VNR requests.
   vector<VNRequest> VNR;
@@ -124,7 +126,7 @@ int main(int argc, char *argv[]) {
       SG.addVNMapping(VNR[curVNR]);
 
       printMapping(VNR[curVNR], SG);
-      saveMapping(VNR[curVNR], SG, mapping_save_to, curVNR);
+      saveMapping(VNR[curVNR], SG, mapping_save_to, curVNR, json_out);
       //      SG.printNodeStatus();
       //      SG.printEdgeStatus();
       // create the departure event after admitting a VN request
