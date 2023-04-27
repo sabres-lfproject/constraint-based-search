@@ -10,8 +10,6 @@
 #include "simulator.hpp"
 
 int main(int argc, char *argv[]) {
-  int reqCount;
-
   int i;
   bool aOne = false, bOne = false;
   double mNS, aNS, mLS, aLS, sdNS, sdLS;
@@ -19,12 +17,10 @@ int main(int argc, char *argv[]) {
   double sub_w = 1.0;
   int nodeMapMethod;
   double nodeRev, edgeRev, totRev, nodeCost, edgeCost, totCost;
-  string sn_graph_path;
-  if (argc != 8) {
-    cerr << "usage: SIM <rC> <rD> <rSub> <oF> <oM> <w>" << endl;
-    cerr << "<rC>: total number of requests" << endl;
-    cerr << "<rD>: directory containing the requests " << endl;
-    cerr << "<rSub>: the substrate network file path" << endl;
+  if (argc != 7) {
+    cerr << "usage: SIM <req> <sub> <oF> <oM> <w> <json>" << endl;
+    cerr << "<req>: the virtual network request file path" << endl;
+    cerr << "<sub>: the substrate network file path" << endl;
     cerr << "<oF>: output file to dump the results" << endl;
     cerr << "<oM>: where to output the mapping" << endl;
     cerr << "<w>: suboptimal bound" << endl;
@@ -32,24 +28,18 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  reqCount = atoi(argv[1]);  // total number of requests
-  sn_graph_path = argv[3];
-
-  std::string reqFolderName = argv[2];
-  std::string outputFileName = argv[4];
-
-  string mapping_save_to = argv[5];
+  std::string reqFileName = argv[1];
+  std::string sn_graph_path = argv[2];
+  std::string outputFileName = argv[3];
+  std::string outputMapName= argv[4];
 
   nodeMapMethod = 7;      // 1: GREEDY. 5: D-ViNE 6: R-ViNE 7:VNE-CBS
   aOne = bOne = 0;        // true: try to load balance
   __MULT = 1.0;           // cpu vs bw weighting value
-  sub_w = atof(argv[6]);  // suboptimal bound for cbs.
+  sub_w = atof(argv[5]);  // suboptimal bound for cbs.
   // load network graph.
   SubstrateGraph SG(sn_graph_path, 0);
-  bool json_out = (atoi(argv[7]) == 0) ? false : true;
-
-  // vetor stores VNR requests.
-  vector<VNRequest> VNR;
+  bool json_out = (atoi(argv[6]) == 0) ? false : true;
 
   // init simulator
   Simulator mySim;
@@ -78,17 +68,11 @@ int main(int argc, char *argv[]) {
 
   srand((unsigned)time(NULL));  // initialize random number generator
 
-  // read all the requests, one by one.
-  for (i = 0; i < reqCount; i++) {
-    std::string reqFileName = reqFolderName + "/req" + std::to_string(i) + ".vnr";
+  VNRequest VNR = VNRequest(reqFileName.c_str(), 0);
 
-    // save the request in the list.
-    VNR.push_back(VNRequest(reqFileName.c_str(), i));
-
-    // create the arrival event and add to event queue.
-    mySim.PQ.push(Event(EVENT_ARRIVE, VNR[i].time, i));
-    cout << "pushed." << endl;
-  }
+  // create the arrival event and add to event queue.
+  mySim.PQ.push(Event(EVENT_ARRIVE, VNR.time, 0));
+  cout << "event added." << endl;
 
   // simulate all the events
   while (!mySim.empty()) {
@@ -106,14 +90,14 @@ int main(int argc, char *argv[]) {
       if (nodeMapMethod == 7) {
         cout << "New Event ---------" << endl;
         cbs.count_num = 0;
-        vector<Path> mapping = cbs.find_solution(SG, VNR[curVNR], sub_w);
+        vector<Path> mapping = cbs.find_solution(SG, VNR, sub_w);
         if (mapping.empty()) {
           mapFailCount++;
           goto LABEL_MAP_FAILED;
         } else {
           // update VNR info, CPU, BW etc.
           cout << "Updating VNR info" << endl;
-          cbs.update_VNR_info(mapping, VNR[curVNR], SG);
+          cbs.update_VNR_info(mapping, VNR, SG);
         }
 
       } else {
@@ -123,22 +107,22 @@ int main(int argc, char *argv[]) {
       }
 
       requestAccepted = true;
-      SG.addVNMapping(VNR[curVNR]);
+      SG.addVNMapping(VNR);
 
-      printMapping(VNR[curVNR], SG);
-      saveMapping(VNR[curVNR], SG, mapping_save_to, curVNR, json_out);
+      printMapping(VNR, SG);
+      saveMapping(VNR, SG, outputMapName, curVNR, json_out);
       //      SG.printNodeStatus();
       //      SG.printEdgeStatus();
       // create the departure event after admitting a VN request
-      mySim.PQ.push(Event(EVENT_DEPART, VNR[curVNR].time + VNR[curVNR].duration, curVNR));
+      mySim.PQ.push(Event(EVENT_DEPART, VNR.time + VNR.duration, curVNR));
     } else if (curEvent.type == EVENT_DEPART) {  // handle departure event
-      SG.removeVNMapping(VNR[curVNR]);
+      SG.removeVNMapping(VNR);
     } else {
     }
 
   LABEL_MAP_FAILED:
-    totRev = getRevenue(VNR[curVNR], __MULT, nodeRev, edgeRev);
-    totCost = getCost(VNR[curVNR], SG, __MULT, nodeCost, edgeCost, aOne, bOne);
+    totRev = getRevenue(VNR, __MULT, nodeRev, edgeRev);
+    totCost = getCost(VNR, SG, __MULT, nodeCost, edgeCost, aOne, bOne);
     getDifferentStress(SG, mNS, aNS, mLS, aLS, sdNS, sdLS);
 
     auto end = chrono::high_resolution_clock::now();
@@ -148,7 +132,7 @@ int main(int argc, char *argv[]) {
             "%4d, %6d, %6d, %d, %d, %10.4lf, %10.4lf, %d, %.4f\n",
             curEvent.index,
             curEvent.time,
-            VNR[curEvent.index].duration,
+            VNR.duration,
             curEvent.type,
             requestAccepted,
             totRev,

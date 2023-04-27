@@ -520,7 +520,24 @@ int SubstrateGraph::initGraph() {
     return COULD_NOT_OPEN_FILE;
   }
 
+  // formatting check
+  int lines = 0;
+  char* line = 0;
+  size_t len = 0;
+  ssize_t read;
+  while ((read = getline(&line, &len, fp)) != -1) {
+      lines++;
+  }
+  free(line);
+  fseek(fp, 0, SEEK_SET);
+
   fscanf(fp, "%d %d", &nodeNum, &edgeNum);
+
+  if (lines != 1+nodeNum+edgeNum) {
+      fprintf(stderr, "request file is not correctly formatted.\n");
+      fprintf(stderr, "found: %d, needed %d\n", lines, 1+nodeNum+edgeNum);
+      exit(1);
+  }
 
   // read nodes and add them to vector
   for (i = 0; i < nodeNum; i++) {
@@ -650,7 +667,24 @@ int VNRequest::initGraph() {
     return COULD_NOT_OPEN_FILE;
   }
 
+  // formatting check
+  int lines = 0;
+  char* line = 0;
+  size_t len = 0;
+  ssize_t read;
+  while ((read = getline(&line, &len, fp)) != -1) {
+      lines++;
+  }
+  free(line);
+  fseek(fp, 0, SEEK_SET);
+
   fscanf(fp, "%d %d %d %d %d %d %d", &nodeNum, &edgeNum, &split, &time, &duration, &topology, &maxD);
+
+  if (lines != 1+nodeNum+edgeNum) {
+      fprintf(stderr, "request file is not correctly formatted.\n");
+      fprintf(stderr, "found: %d, needed %d\n", lines, 1+nodeNum+edgeNum);
+      exit(1);
+  }
 
   // read nodes
   for (i = 0; i < nodeNum; i++) {
