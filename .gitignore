@@ -1,5 +1,8 @@
 *.swp
 *.txt
 *.out
+CMakeFiles/
+*.cmake
 
-build
+cbs
+Makefile

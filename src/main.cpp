@@ -17,35 +17,34 @@ int main(int argc, char *argv[]) {
   double sub_w = 1.0;
   int nodeMapMethod;
   double nodeRev, edgeRev, totRev, nodeCost, edgeCost, totCost;
-  if (argc != 7) {
-    cerr << "usage: SIM <req> <sub> <oF> <oM> <w> <json>" << endl;
+  fprintf(stderr, "%d\n", argc);
+  if (argc != 4) {
+    cerr << "usage: <req> <sub> <outDir>" << endl;
     cerr << "<req>: the virtual network request file path" << endl;
     cerr << "<sub>: the substrate network file path" << endl;
-    cerr << "<oF>: output file to dump the results" << endl;
-    cerr << "<oM>: where to output the mapping" << endl;
-    cerr << "<w>: suboptimal bound" << endl;
-    cerr << "<json>: json output mapping file" << endl;
+    cerr << "<outDir>: output directory to dump the results" << endl;
     exit(1);
   }
 
   std::string reqFileName = argv[1];
   std::string sn_graph_path = argv[2];
-  std::string outputFileName = argv[3];
-  std::string outputMapName= argv[4];
+  std::string outputDirectory = argv[3];
 
   nodeMapMethod = 7;      // 1: GREEDY. 5: D-ViNE 6: R-ViNE 7:VNE-CBS
   aOne = bOne = 0;        // true: try to load balance
   __MULT = 1.0;           // cpu vs bw weighting value
-  sub_w = atof(argv[5]);  // suboptimal bound for cbs.
   // load network graph.
   SubstrateGraph SG(sn_graph_path, 0);
-  bool json_out = (atoi(argv[6]) == 0) ? false : true;
 
   // init simulator
   Simulator mySim;
 
   // init CBS solver
   CBS_Solver cbs;
+
+  std::string outputFileName, outputMapName;
+  outputFileName = outputDirectory + "/" + "out.txt";
+  outputMapName = outputDirectory +  "/" + "out.json";
 
   // output file opening.
   FILE *outputFP = fopen(outputFileName.c_str(), "w");
@@ -68,7 +67,7 @@ int main(int argc, char *argv[]) {
 
   srand((unsigned)time(NULL));  // initialize random number generator
 
-  VNRequest VNR = VNRequest(reqFileName.c_str(), 0);
+  VNRequest VNR = VNRequest(reqFileName.c_str());
 
   // create the arrival event and add to event queue.
   mySim.PQ.push(Event(EVENT_ARRIVE, VNR.time, 0));
@@ -110,7 +109,7 @@ int main(int argc, char *argv[]) {
       SG.addVNMapping(VNR);
 
       printMapping(VNR, SG);
-      saveMapping(VNR, SG, outputMapName, curVNR, json_out);
+      saveMapping(VNR, SG, outputMapName);
       //      SG.printNodeStatus();
       //      SG.printEdgeStatus();
       // create the departure event after admitting a VN request

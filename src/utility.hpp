@@ -48,7 +48,7 @@ class VNRequest;
 
 // function declarations
 void printMapping(VNRequest &VNR, SubstrateGraph &SG);
-void saveMapping(VNRequest &VNR, SubstrateGraph &SG, string save_file_path, int VNR_id, bool json);
+void saveMapping(VNRequest &VNR, SubstrateGraph &SG, string save_file_path);
 void randomPermutation(vector<int> &series);
 
 void getDifferentStress(SubstrateGraph &SG,
@@ -220,7 +220,7 @@ class VNRequest {
   vector<VNNode> nodes;
   vector<VNEdge> edges;
 
-  VNRequest(string _fileName, int _reqID);
+  VNRequest(string _fileName);
 
 #ifdef MYCPP
   VNRequest(const VNRequest &o);
