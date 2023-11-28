@@ -18,6 +18,11 @@ var (
 	DataDir        string = "./data/"
 )
 
+type CBSRequest struct {
+	Constraints []*proto.Constraint `form:"constraints" json:"constraints" binding:"required"`
+	Graph       *graph.Graph        `form:"graph" json:"graph" binding:"required"`
+}
+
 func GraphToFile(g *graph.Graph) (string, map[string]int, error) {
 	fiName := fmt.Sprintf("%s/%s.sn", DataDir, "graph")
 

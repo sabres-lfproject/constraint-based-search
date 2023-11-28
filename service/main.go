@@ -17,11 +17,6 @@ import (
 	proto "pulwar.isi.edu/sabres/orchestrator/sabres/network/protocol"
 )
 
-type CBSRequest struct {
-	Constraints []*proto.Constraint `form:"constraints" json:"constraints" binding:"required"`
-	Graph       *graph.Graph        `form:"graph" json:"graph" binding:"required"`
-}
-
 func runCBS(command string, args []string) error {
 
 	cmd := &exec.Cmd{
@@ -42,15 +37,15 @@ func runCBS(command string, args []string) error {
 
 func manageCBS(c []*proto.Constraint, g *graph.Graph) ([]byte, error) {
 
-	// convert constraints to file
-	// vnrFile
-	vnrFiName, err := pkg.ConstraintsToFile(c)
+	// convert substrait to file
+	snFiName, m, err := pkg.GraphToFile(g)
 	if err != nil {
 		return nil, err
 	}
 
-	// convert substrait to file
-	snFiName, err := pkg.GraphToFile(g)
+	// convert constraints to file
+	// vnrFile
+	vnrFiName, err := pkg.ConstraintsToFile(c, m)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +63,7 @@ func manageCBS(c []*proto.Constraint, g *graph.Graph) ([]byte, error) {
 }
 
 func manageCBSHandler(c *gin.Context) {
-	var jsonInput CBSRequest
+	var jsonInput pkg.CBSRequest
 	if err := c.ShouldBindJSON(&jsonInput); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -1,3 +1,6 @@
 *.sn
 *.vnr
 *.json
+
+# binary
+service
