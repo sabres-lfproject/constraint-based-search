@@ -19,7 +19,7 @@ import (
 
 type CBSRequest struct {
 	Constraints []*proto.Constraint `form:"constraints" json:"constraints" binding:"required"`
-	Graph       graph.Graph         `form:"graph" json:"graph" binding:"required"`
+	Graph       *graph.Graph        `form:"graph" json:"graph" binding:"required"`
 }
 
 func runCBS(command string, args []string) error {
@@ -40,7 +40,7 @@ func runCBS(command string, args []string) error {
 	return err
 }
 
-func manageCBS(c []*proto.Constraint, g graph.Graph) ([]byte, error) {
+func manageCBS(c []*proto.Constraint, g *graph.Graph) ([]byte, error) {
 
 	// convert constraints to file
 	// vnrFile
