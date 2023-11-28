@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	CBSPath        string = "/usr/bin/cbs"
 	DefaultCBSHost string = "localhost"
 	DefaultCBSPort int    = 15030
 	DataDir        string = "./data/"
@@ -107,7 +106,7 @@ func GraphToFile(g *graph.Graph) (string, map[string]int, error) {
 		}
 	}
 
-	return "", m, nil
+	return fiName, m, nil
 }
 
 func GraphFromFile() (*graph.Graph, error) {

@@ -33,7 +33,8 @@
         "name": "alice",
         "weight": 10,
         "properties": {
-          "cpu": "200"
+          "cpu": "200",
+          "endpoint": "yes"
         }
       },
       {
@@ -47,7 +48,8 @@
         "name": "charlie",
         "value": "12",
         "properties": {
-          "cpu": "2"
+          "cpu": "2",
+          "endpoint": "yes"
         }
       }
     ],

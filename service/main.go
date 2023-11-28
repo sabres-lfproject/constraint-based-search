@@ -17,6 +17,10 @@ import (
 	proto "pulwar.isi.edu/sabres/orchestrator/sabres/network/protocol"
 )
 
+var (
+	cbsPath string
+)
+
 func runCBS(command string, args []string) error {
 
 	cmd := &exec.Cmd{
@@ -50,8 +54,11 @@ func manageCBS(c []*proto.Constraint, g *graph.Graph) ([]byte, error) {
 		return nil, err
 	}
 
-	// TODO: cbs path modifiable
-	err = runCBS(pkg.CBSPath, []string{vnrFiName, snFiName, pkg.DataDir})
+	log.Infof("vnrfile name: %s\n", vnrFiName)
+	log.Infof("snfile name: %s\n", snFiName)
+
+	// args[0] is executable
+	err = runCBS(cbsPath, []string{cbsPath, vnrFiName, snFiName, pkg.DataDir})
 	if err != nil {
 		return nil, err
 	}
@@ -91,13 +98,23 @@ func main() {
 	flag.IntVar(&port, "port", pkg.DefaultCBSPort, "set the cbs port value")
 	flag.BoolVar(&debug, "debug", false, "enable extra debug logging")
 	flag.StringVar(&pkg.DataDir, "dir", "./data", "directory with mock data")
+	flag.StringVar(&cbsPath, "path", "/usr/bin/cbs", "set the path to find cbs binary")
 
 	flag.Parse()
+
+	cbsPathStr := os.Getenv("CBSPATH")
+	if cbsPathStr != "" {
+		cbsPath = cbsPathStr
+	}
+
+	log.Infof("cbs binary path: %s\n", cbsPath)
 
 	hostStr := os.Getenv("CBSHOST")
 	if hostStr != "" {
 		host = hostStr
 	}
+
+	log.Infof("cbs host: %s\n", host)
 
 	portStr := os.Getenv("CBSPORT")
 	if portStr != "" {
@@ -108,6 +125,8 @@ func main() {
 			port = portInt
 		}
 	}
+
+	log.Infof("cbs port: %d\n", port)
 
 	debugStr := os.Getenv("DEBUG")
 	if debugStr != "" {
@@ -123,6 +142,8 @@ func main() {
 	if datadirStr != "" {
 		pkg.DataDir = datadirStr
 	}
+
+	log.Infof("data directory: %s\n", pkg.DataDir)
 
 	r := gin.Default()
 
