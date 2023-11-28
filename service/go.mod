@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/sirupsen/logrus v1.9.3
-	pulwar.isi.edu/sabres/orchestrator v0.0.0-20231123044734-ade0851ebc36
+	pulwar.isi.edu/sabres/orchestrator v0.0.0-20231128193823-ff668a8c2123
 )
 
 require (

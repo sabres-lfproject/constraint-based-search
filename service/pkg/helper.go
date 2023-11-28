@@ -3,6 +3,8 @@ package pkg
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	graph "pulwar.isi.edu/sabres/orchestrator/sabres/network/graph"
@@ -16,56 +18,30 @@ var (
 	DataDir        string = "./data/"
 )
 
-/*
-	type Vertex struct {
-		Name       string
-		Value      string
-		Properties map[string]string
-		Weight     int
-	}
-
-	type Edge struct {
-		Name       string
-		Vertices   []*Vertex
-		Properties map[string]string
-		Weight     int
-	}
-
-	type Graph struct {
-		Name     string
-		Vertices []*Vertex
-		Edges    []*Edge
-	}
-
-4 6
-0 0 5
-0 0 20
-0 0 300
-0 0 100
-0 1 100 30
-0 2 100 70
-0 3 100 80
-1 2 100 75
-1 3 100 60
-2 3 100 40
-*/
-func GraphToFile(g *graph.Graph) (string, error) {
+func GraphToFile(g *graph.Graph) (string, map[string]int, error) {
 	fiName := fmt.Sprintf("%s/%s.sn", DataDir, "graph")
 
-	fi, err := os.OpenFile(fiName, os.O_CREATE|os.O_WRONLY, 0644)
+	fi, err := os.Create(fiName)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	defer fi.Close()
 
 	// first line: node, edge
-	_, err = fi.Write([]byte(fmt.Sprintf("%d %d\n", len(g.Vertices), len(g.Edges))))
+	line := fmt.Sprintf("%d %d\n", len(g.Vertices), len(g.Edges))
+	log.Infof("line: %s\n", line)
+
+	_, err = fi.Write([]byte(line))
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
+
+	// track node name to where it gets written in file
+	m := make(map[string]int)
 
 	nodeMap := make(map[string]int)
 	// nodes and cpu
+	coord := 1
 	for t, x := range g.Vertices {
 		props := x.Properties
 		y, ok := props["cpu"]
@@ -73,9 +49,26 @@ func GraphToFile(g *graph.Graph) (string, error) {
 			y = "0"
 		}
 
-		_, err = fi.Write([]byte(fmt.Sprintf("0 0 %s\n", y)))
+		// TODO: because of how cbs is written, we need
+		// to check prop field for a start and end and write
+		// that into the graph, even though that may be
+		// a constraint- so TODO is just wait for the next
+		// code iteration
+		line := ""
+		_, ok = props["endpoint"]
+		if ok {
+			line = fmt.Sprintf("%d %d %s\n", coord, coord, y)
+			m[x.Name] = coord
+			coord++
+		} else {
+			line = fmt.Sprintf("0 0 %s\n", y)
+			m[x.Name] = 0
+		}
+		log.Infof("line: %s\n", line)
+
+		_, err = fi.Write([]byte(line))
 		if err != nil {
-			return "", err
+			return "", nil, err
 		}
 		nodeMap[x.Name] = t
 	}
@@ -101,16 +94,122 @@ func GraphToFile(g *graph.Graph) (string, error) {
 			lat = "0"
 		}
 
-		_, err = fi.Write([]byte(fmt.Sprintf("%d %d %s %s\n", x, y, bw, lat)))
+		line := fmt.Sprintf("%d %d %s %s\n", x, y, bw, lat)
+		log.Infof("line: %s\n", line)
+		_, err = fi.Write([]byte(line))
 		if err != nil {
-			return "", err
+			return "", nil, err
 		}
 	}
 
-	return "", nil
+	return "", m, nil
 }
 
-func ConstraintsToFile(c []*proto.Constraint) (string, error) {
+func GraphFromFile() (*graph.Graph, error) {
+	fiName := fmt.Sprintf("%s/%s.sn", DataDir, "graph")
+
+	fiContents, err := os.ReadFile(fiName)
+	if err != nil {
+		return nil, err
+	}
+	contents := strings.Split(string(fiContents), "\n")
+
+	line1 := strings.Split(string(contents[0]), " ")
+	log.Infof("line 0: %s\n", line1)
+	nodeStr := line1[0]
+	nodes, err := strconv.Atoi(nodeStr)
+	if err != nil {
+		return nil, err
+	}
+
+	/*
+		vertStr := line1[1]
+		verts, err := strconv.Atoi(vertStr)
+		if err != nil {
+			return nil, err
+		}
+	*/
+
+	g := &graph.Graph{}
+
+	for i := 1; i <= nodes; i++ {
+		nodeLine := strings.Split(string(contents[i]), " ")
+		log.Infof("vertex line %d: %s\n", i, nodeLine)
+
+		if len(nodeLine) != 3 {
+			return nil, fmt.Errorf("input graph file has bad node line: %s", nodeLine)
+		}
+
+		var endpoint bool = false
+		if nodeLine[0] != "0" {
+			endpoint = true
+		}
+
+		cpu := nodeLine[2]
+
+		n := &graph.Vertex{
+			Name: fmt.Sprintf("%d", i),
+			Properties: map[string]string{
+				"cpu": cpu,
+			},
+		}
+
+		if endpoint {
+			n.Properties["endpoint"] = "true"
+		}
+
+		err := g.AddVertexObj(n)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	for i := nodes + 1; i < len(contents)-1; i++ {
+		edgeLine := strings.Split(string(contents[i]), " ")
+		log.Infof("edge line %d: %s\n", i, edgeLine)
+
+		if len(edgeLine) != 4 {
+			return nil, fmt.Errorf("input graph file has bad edge line: %s", edgeLine)
+		}
+
+		v0, err := strconv.Atoi(edgeLine[0])
+		if err != nil {
+			return nil, err
+		}
+
+		v1, err := strconv.Atoi(edgeLine[1])
+		if err != nil {
+			return nil, err
+		}
+
+		v := &graph.Vertex{Name: fmt.Sprintf("%d", v0+1)}
+
+		f, n0 := g.FindVertex(v)
+		if !f {
+			return nil, fmt.Errorf("could not find vertex: %s in graph", edgeLine[0])
+		}
+
+		v = &graph.Vertex{Name: fmt.Sprintf("%d", v1+1)}
+
+		f, n1 := g.FindVertex(v)
+		if !f {
+			return nil, fmt.Errorf("could not find vertex: %s in graph", edgeLine[1])
+		}
+
+		_, err = g.AddEdge(n0, n1, map[string]string{"bandwidth": edgeLine[2], "latency": edgeLine[3]})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	log.Infof("after reading file: %v\n", g)
+
+	return g, nil
+}
+
+// we need graph so we can understand the underlay to reference
+func ConstraintsToFile(c []*proto.Constraint, graphFileMap map[string]int) (string, error) {
 	fiName := fmt.Sprintf("%s/%s.vnr", DataDir, "req0")
 
 	// TODO because this is iVNE, operator always >
@@ -121,15 +220,26 @@ func ConstraintsToFile(c []*proto.Constraint) (string, error) {
 	fileCount := 1
 	fileMap := make(map[int]string)
 
+	// TODO: the constraint must understand the underlying graph topology for naming nodes
+	nodeMap := make(map[string]int)
+
 	// node constraints
 	// x, y, cpu constraint, the line becomes the identifier of the virtual node ID
-	nodeMap := make(map[string]int)
 	for i, constraint := range c {
 		if constraint.Object == "cpu" {
-			line := fmt.Sprintf("%d %d %s\n", i, i, constraint.Lvalue)
 			if len(constraint.Vertices) == 1 {
-				nodeMap[constraint.Vertices[0]] = i
+				name := constraint.Vertices[0]
+				// nln should not be 0, if it is its a bad but legal constraint?
+				line := fmt.Sprintf("0 0 %s\n", constraint.Lvalue)
+				nln, ok := graphFileMap[name]
+				log.Infof("%s, %v", name, graphFileMap)
+				if ok {
+					line = fmt.Sprintf("%d %d %s\n", nln, nln, constraint.Lvalue)
+				} else {
+					return "", fmt.Errorf("vertex name missing from map: %s ->? %v", name, graphFileMap)
+				}
 				fileMap[fileCount] = line
+				nodeMap[constraint.Vertices[0]] = i
 				fileCount++
 			}
 		}
@@ -140,10 +250,22 @@ func ConstraintsToFile(c []*proto.Constraint) (string, error) {
 	for _, constraint := range c {
 		if constraint.Object == "bandwidth" {
 			if len(constraint.Vertices) == 2 {
+
+				x, ok := nodeMap[constraint.Vertices[0]]
+				if !ok {
+					return "", fmt.Errorf("edge vertex missing: %s", constraint.Vertices[0])
+				}
+				y, ok := nodeMap[constraint.Vertices[1]]
+				if !ok {
+					return "", fmt.Errorf("edge vertex missing: %s", constraint.Vertices[1])
+
+				}
+
 				line := fmt.Sprintf("%d %d %s %d\n",
-					nodeMap[constraint.Vertices[0]],
-					nodeMap[constraint.Vertices[1]],
-					constraint.Lvalue, 0,
+					x,
+					y,
+					constraint.Lvalue,
+					0,
 				)
 				fileMap[fileCount] = line
 				fileCount++
@@ -157,14 +279,15 @@ func ConstraintsToFile(c []*proto.Constraint) (string, error) {
 
 	log.Infof("to write %s contents:\n%v\n", fiName, fileMap)
 
-	fi, err := os.OpenFile(fiName, os.O_CREATE|os.O_WRONLY, 0644)
+	fi, err := os.Create(fiName)
 	if err != nil {
 		return "", err
 	}
 	defer fi.Close()
 
-	for i := 0; i <= len(fileMap); i++ {
+	for i := 0; i < len(fileMap); i++ {
 		line := fileMap[i]
+		log.Infof("line %d: %s\n", i, line)
 		_, err = fi.Write([]byte(line))
 		if err != nil {
 			return "", err
