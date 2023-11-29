@@ -15,29 +15,46 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 void saveMapping(VNRequest &VNR, SubstrateGraph &SG, string save_file_path) {
-  int i;
+  int i, j;
   FILE *saveto = fopen(save_file_path.c_str(), "w");
 
   fprintf(saveto, "{\n");
+
   fprintf(saveto, "\t\"nodes\": [\n");
   for (i = 0; i < VNR.nodeNum; i++) {
-    fprintf(saveto, "\t\t{\"vnf\": %d, \"vim\": %d}", i, VNR.nodes[i].subNodeID);
+    fprintf(saveto, "\t\t{\"node\": %d, \"cpu\": %f, \"leftover\": %f}", 
+                    VNR.nodes[i].subNodeID,
+                    VNR.nodes[i].cpu, 
+                    SG.nodes[VNR.nodes[i].subNodeID].rest_cpu);
+
+    // only add comma when we have more to add
     if ((i + 1) < VNR.nodeNum) {
       fprintf(saveto, ",");
     }
+
     fprintf(saveto, "\n");
   }
+  // always assume edges
   fprintf(saveto, "\t],\n");
+
   fprintf(saveto, "\t\"edges\": [\n");
   for (i = 0; i < VNR.edgeNum; i++) {
-    fprintf(saveto, "\t\t{\"src\": %d, \"dst\": %d}", VNR.edges[i].from, VNR.edges[i].to);
-    if ((i + 1) < VNR.edgeNum) {
-      fprintf(saveto, ",");
+    for (j = 0; j < VNR.edges[i].pathLen; j++) {
+      fprintf(saveto, "\t\t{\"src\": %d, \"dst\": %d, \"cost\": %f}",
+             SG.edges[VNR.edges[i].subPath[j]].from,
+             SG.edges[VNR.edges[i].subPath[j]].to,
+             VNR.edges[i].subBW[j]);
+      if ((j + 1) < VNR.edges[i].pathLen) {
+         fprintf(saveto, ",");
+      }
+
+      fprintf(saveto, "\n");
     }
-    fprintf(saveto, "\n");
   }
+
   fprintf(saveto, "\t]\n");
   fprintf(saveto, "}\n");
+
   fclose(saveto);
 }
 
