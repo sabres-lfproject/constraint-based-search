@@ -1,4 +1,4 @@
-module pulwar.isi.edu/cbs/cbs/service
+module pulwar.isi.edu/sabres/cbs/cbs/service
 
 go 1.19
 

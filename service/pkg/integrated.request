@@ -1,0 +1,87 @@
+{
+  "constraints": [
+    {
+      "operator": ">",
+      "lvalue": "100",
+      "object": "cpu",
+      "vertices": [
+        "alice"
+      ]
+    },
+    {
+      "operator": ">",
+      "lvalue": "1",
+      "object": "cpu",
+      "vertices": [
+        "charlie"
+      ]
+    },
+    {
+      "operator": ">",
+      "lvalue": "100",
+      "object": "bandwidth",
+      "vertices": [
+        "alice",
+        "charlie"
+      ]
+    }
+  ],
+  "graph": {
+    "name": "test-blob",
+    "vertices": [
+      {
+        "name": "alice",
+        "weight": 10,
+        "properties": {
+          "cpu": "200",
+          "endpoint": "yes"
+        }
+      },
+      {
+        "name": "bob",
+        "weight": 11,
+        "properties": {
+          "cpu": "120"
+        }
+      },
+      {
+        "name": "charlie",
+        "value": "12",
+        "properties": {
+          "cpu": "2",
+          "endpoint": "yes"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "name": "alice-bob",
+        "vertices": [
+          {
+            "name": "alice"
+          },
+          {
+            "name": "bob"
+          }
+        ],
+        "properties": {
+          "bandwidth": "200"
+        }
+      },
+      {
+        "name": "bob-charlie",
+        "vertices": [
+          {
+            "name": "bob"
+          },
+          {
+            "name": "charlie"
+          }
+        ],
+        "properties": {
+          "bandwidth": "200"
+        }
+      }
+    ]
+  }
+}

@@ -14,7 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
-	"pulwar.isi.edu/cbs/cbs/service/pkg"
+	"pulwar.isi.edu/sabres/cbs/cbs/service/pkg"
 	graph "pulwar.isi.edu/sabres/orchestrator/sabres/network/graph"
 	proto "pulwar.isi.edu/sabres/orchestrator/sabres/network/protocol"
 )

@@ -11,3 +11,10 @@ Updated means of running cbs. Pass in 3 variables:
 ```
 
 vnr and graph formats are given at the bottom of the README.md
+
+
+Build container:
+
+```
+sudo ./build_container.sh
+```
