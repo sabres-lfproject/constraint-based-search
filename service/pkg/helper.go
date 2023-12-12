@@ -22,7 +22,13 @@ type CBSRequest struct {
 	Graph       *graph.Graph        `form:"graph" json:"graph" binding:"required"`
 }
 
-func GraphToFile(g *graph.Graph) (string, map[string]int, error) {
+type FileContents struct {
+	Name     string
+	Endpoint int
+	Number   int
+}
+
+func GraphToFile(g *graph.Graph) (string, []*FileContents, error) {
 	fiName := fmt.Sprintf("%s/%s.sn", DataDir, "graph")
 
 	fi, err := os.Create(fiName)
@@ -41,12 +47,12 @@ func GraphToFile(g *graph.Graph) (string, map[string]int, error) {
 	}
 
 	// track node name to where it gets written in file
-	m := make(map[string]int)
-
+	m := make([]*FileContents, 0)
 	nodeMap := make(map[string]int)
-	// nodes and cpu
 	coord := 1
+
 	for t, x := range g.Vertices {
+		fc := &FileContents{Name: x.Name, Number: t}
 		props := x.Properties
 		y, ok := props["cpu"]
 		if !ok {
@@ -62,11 +68,11 @@ func GraphToFile(g *graph.Graph) (string, map[string]int, error) {
 		_, ok = props["endpoint"]
 		if ok {
 			line = fmt.Sprintf("%d %d %s\n", coord, coord, y)
-			m[x.Name] = coord
+			fc.Endpoint = coord
 			coord++
 		} else {
 			line = fmt.Sprintf("0 0 %s\n", y)
-			m[x.Name] = 0
+			fc.Endpoint = 0
 		}
 		log.Infof("line: %s\n", line)
 
@@ -75,6 +81,7 @@ func GraphToFile(g *graph.Graph) (string, map[string]int, error) {
 			return "", nil, err
 		}
 		nodeMap[x.Name] = t
+		m = append(m, fc)
 	}
 
 	// edges and bandwidth, latency
@@ -89,11 +96,11 @@ func GraphToFile(g *graph.Graph) (string, map[string]int, error) {
 		y := nodeMap[verts[1].Name]
 
 		props := e.Properties
-		bw, ok := props["bandwidth"]
+		bw, ok := props["bw"]
 		if !ok {
 			bw = "0"
 		}
-		lat, ok := props["latency"]
+		lat, ok := props["lat"]
 		if !ok {
 			lat = "0"
 		}
@@ -117,6 +124,8 @@ func GraphFromFile() (*graph.Graph, error) {
 		return nil, err
 	}
 	contents := strings.Split(string(fiContents), "\n")
+
+	log.Infof("graphToFile contents: %#v", contents)
 
 	line1 := strings.Split(string(contents[0]), " ")
 	log.Infof("line 0: %s\n", line1)
@@ -213,7 +222,7 @@ func GraphFromFile() (*graph.Graph, error) {
 }
 
 // we need graph so we can understand the underlay to reference
-func ConstraintsToFile(c []*proto.Constraint, graphFileMap map[string]int) (string, error) {
+func ConstraintsToFile(c []*proto.Constraint, graphFileMap []*FileContents) (string, error) {
 	fiName := fmt.Sprintf("%s/%s.vnr", DataDir, "req0")
 
 	// TODO because this is iVNE, operator always >
@@ -235,13 +244,15 @@ func ConstraintsToFile(c []*proto.Constraint, graphFileMap map[string]int) (stri
 				name := constraint.Vertices[0]
 				// nln should not be 0, if it is its a bad but legal constraint?
 				line := fmt.Sprintf("0 0 %s\n", constraint.Lvalue)
-				nln, ok := graphFileMap[name]
-				log.Infof("%s, %v", name, graphFileMap)
-				if ok {
-					line = fmt.Sprintf("%d %d %s\n", nln, nln, constraint.Lvalue)
-				} else {
-					return "", fmt.Errorf("vertex name missing from map: %s ->? %v", name, graphFileMap)
+				for _, x := range graphFileMap {
+					if x.Name == name {
+						if x.Endpoint > 0 {
+							line = fmt.Sprintf("%d %d %s\n", x.Endpoint, x.Endpoint, constraint.Lvalue)
+						}
+						break
+					}
 				}
+				//log.Infof("%s, %v", name, graphFileMap)
 				fileMap[fileCount] = line
 				nodeMap[constraint.Vertices[0]] = i
 				fileCount++

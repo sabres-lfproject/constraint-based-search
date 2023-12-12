@@ -1,87 +1,28 @@
-{
-  "constraints": [
+[
     {
       "operator": ">",
-      "lvalue": "100",
+      "lvalue": "8",
       "object": "cpu",
       "vertices": [
-        "alice"
+        "00000000-0000-0000-0000-000000000001"
       ]
     },
     {
       "operator": ">",
-      "lvalue": "1",
+      "lvalue": "8",
       "object": "cpu",
       "vertices": [
-        "charlie"
+        "00000000-0000-0000-0000-000000000004"
       ]
     },
     {
       "operator": ">",
-      "lvalue": "100",
+      "lvalue": "900",
       "object": "bandwidth",
+      "selector": "00000000-0000-0000-0000-000000000100",
       "vertices": [
-        "alice",
-        "charlie"
+        "00000000-0000-0000-0000-000000000001",
+        "00000000-0000-0000-0000-000000000004"
       ]
     }
-  ],
-  "graph": {
-    "name": "test-blob",
-    "vertices": [
-      {
-        "name": "alice",
-        "weight": 10,
-        "properties": {
-          "cpu": "200",
-          "endpoint": "yes"
-        }
-      },
-      {
-        "name": "bob",
-        "weight": 11,
-        "properties": {
-          "cpu": "120"
-        }
-      },
-      {
-        "name": "charlie",
-        "value": "12",
-        "properties": {
-          "cpu": "2",
-          "endpoint": "yes"
-        }
-      }
-    ],
-    "edges": [
-      {
-        "name": "alice-bob",
-        "vertices": [
-          {
-            "name": "alice"
-          },
-          {
-            "name": "bob"
-          }
-        ],
-        "properties": {
-          "bandwidth": "200"
-        }
-      },
-      {
-        "name": "bob-charlie",
-        "vertices": [
-          {
-            "name": "bob"
-          },
-          {
-            "name": "charlie"
-          }
-        ],
-        "properties": {
-          "bandwidth": "200"
-        }
-      }
-    ]
-  }
-}
+]

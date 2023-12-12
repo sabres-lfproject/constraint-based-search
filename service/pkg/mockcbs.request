@@ -18,8 +18,9 @@
     },
     {
       "operator": ">",
-      "lvalue": "100",
+      "lvalue": "300",
       "object": "bandwidth",
+      "selector": "a",
       "vertices": [
         "alice",
         "charlie"
@@ -51,6 +52,13 @@
           "cpu": "2",
           "endpoint": "yes"
         }
+      },
+      {
+        "name": "don",
+        "weight": 11,
+        "properties": {
+          "cpu": "120"
+        }
       }
     ],
     "edges": [
@@ -65,7 +73,8 @@
           }
         ],
         "properties": {
-          "bandwidth": "200"
+          "selector": "a",
+          "bw": "200"
         }
       },
       {
@@ -79,7 +88,38 @@
           }
         ],
         "properties": {
-          "bandwidth": "200"
+          "selector": "a",
+          "bw": "200"
+        }
+      },
+      {
+        "name": "alice-don",
+        "vertices": [
+          {
+            "name": "alice"
+          },
+          {
+            "name": "don"
+          }
+        ],
+        "properties": {
+          "selector": "b",
+          "bw": "1000"
+        }
+      },
+      {
+        "name": "don-charlie",
+        "vertices": [
+          {
+            "name": "don"
+          },
+          {
+            "name": "charlie"
+          }
+        ],
+        "properties": {
+          "selector": "b",
+          "bw": "1000"
         }
       }
     ]
