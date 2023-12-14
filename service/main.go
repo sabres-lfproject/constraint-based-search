@@ -116,28 +116,6 @@ func manageCBS(c []*proto.Constraint, g *graph.Graph) (string, []*pkg.FileConten
 	return fiNameOut, graphMap, err
 }
 
-type CBSEdge struct {
-	Source      int     `yaml:"src" json:"src" binding:"required"`
-	Destination int     `yaml:"dst" json:"dst" binding:"required"`
-	Cost        float32 `yaml:"cost" json:"cost" binding:"required"`
-}
-
-type CBSNode struct {
-	Node     int     `yaml:"node" json:"node" binding:"required"`
-	CPU      float32 `yaml:"cpu" json:"cpu" binding:"required"`
-	Leftover float32 `yaml:"leftover" json:"leftover" binding:"required"`
-}
-
-type CBSOutput struct {
-	Nodes []*CBSNode `yaml:"nodes" json:"nodes" binding:"required"`
-	Edges []*CBSEdge `yaml:"edges" json:"edges" binding:"required"`
-}
-
-type JsonCBSOut struct {
-	Nodes []map[string]string `yaml:"nodes" json:"nodes" binding:"required"`
-	Edges []map[string]string `yaml:"edges" json:"edges" binding:"required"`
-}
-
 func manageCBSHandler(c *gin.Context) {
 
 	log.Infof("in manageCBSHandler\n")
@@ -171,7 +149,7 @@ func manageCBSHandler(c *gin.Context) {
 		log.Infof("map in<->out: %#v\n", mapToStr)
 
 		// need to open up the json now
-		var content *CBSOutput
+		var content *pkg.CBSOutput
 		jsonContents, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", pkg.DataDir, "out.json"))
 		err = json.Unmarshal(jsonContents, &content)
 		if err != nil {
@@ -179,7 +157,7 @@ func manageCBSHandler(c *gin.Context) {
 			return
 		}
 
-		jsonOut := &JsonCBSOut{
+		jsonOut := &pkg.JsonCBSOut{
 			Edges: make([]map[string]string, 0),
 			Nodes: make([]map[string]string, 0),
 		}

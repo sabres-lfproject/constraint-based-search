@@ -28,6 +28,47 @@ type FileContents struct {
 	Number   int
 }
 
+type CBSEdge struct {
+	Source      int     `yaml:"src" json:"src" binding:"required"`
+	Destination int     `yaml:"dst" json:"dst" binding:"required"`
+	Cost        float32 `yaml:"cost" json:"cost" binding:"required"`
+}
+
+type CBSNode struct {
+	Node     int     `yaml:"node" json:"node" binding:"required"`
+	CPU      float32 `yaml:"cpu" json:"cpu" binding:"required"`
+	Leftover float32 `yaml:"leftover" json:"leftover" binding:"required"`
+}
+
+type CBSOutput struct {
+	Nodes []*CBSNode `yaml:"nodes" json:"nodes" binding:"required"`
+	Edges []*CBSEdge `yaml:"edges" json:"edges" binding:"required"`
+}
+
+type JsonCBSOut struct {
+	Nodes []map[string]string `yaml:"nodes" json:"nodes" binding:"required"`
+	Edges []map[string]string `yaml:"edges" json:"edges" binding:"required"`
+}
+
+/*
+type CBSNode struct {
+	Cpu      string `json:"cpu,omitempty"`
+	Leftover string `json:"leftover,omitempty"`
+	Node     string `json:"node,omitempty"`
+}
+
+type CBSEdge struct {
+	Cost        string `json:"cost,omitempty"`
+	Source      string `json:"src,omitempty"`
+	Destination string `json:"dst,omitempty"`
+}
+
+type CBSResponse struct {
+	Nodes []*CBSNode
+	Edges []*CBSEdge
+}
+*/
+
 func GraphToFile(g *graph.Graph) (string, []*FileContents, error) {
 	fiName := fmt.Sprintf("%s/%s.sn", DataDir, "graph")
 
