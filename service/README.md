@@ -4,7 +4,6 @@ start service:
 CBSPATH=../cbs DATADIR=./pkg ./service
 ```
 
-
 run a curl using a mocked request:
 
 ```
